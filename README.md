@@ -21,6 +21,15 @@ Teacher Coach AI was created to help solve this challenge using artificial intel
 
 ---
 
+## Minimum System Requirements
+
+- Intel Core i5 / Ryzen 5
+- 16 GB RAM
+- 20 GB free storage
+- Windows 10/11 or Linux
+- Ollama installed locally
+- Gemma 4 downloaded locally
+
 ## Solution
 
 The system allows teachers to upload student grades and classroom results through a simple interface.
