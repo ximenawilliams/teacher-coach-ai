@@ -6,6 +6,8 @@ from pathlib import Path
 
 CURRICULUM_UPLOAD_DIR = Path("curriculum_uploads")
 CURRICULUM_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+UPLOAD_DIR = Path("uploads")
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 st.set_page_config(page_title="Teacher Coach AI", page_icon="📚", layout="wide")
 
@@ -108,6 +110,10 @@ if "curriculum_file_path" not in st.session_state:
     st.session_state.curriculum_file_path = ""
 if "curriculum_df" not in st.session_state:
     st.session_state.curriculum_df = None
+if "student_column_mapping" not in st.session_state:
+    st.session_state.student_column_mapping = {}
+if "curriculum_column_mapping" not in st.session_state:
+    st.session_state.curriculum_column_mapping = {}
 if "curriculum_source" not in st.session_state:
     st.session_state.curriculum_source = "MEDUCA"
 if "curriculum_grade" not in st.session_state:
@@ -184,6 +190,24 @@ elif st.session_state.screen == "index":
             st.markdown("### Vista previa del currículo")
             st.dataframe(st.session_state.curriculum_df.head(10), use_container_width=True)
             st.markdown("**Columnas del currículo:** " + ", ".join(st.session_state.curriculum_df.columns))
+            st.markdown("### Mapear columnas del currículo")
+            # Campos objetivos que queremos mapear
+            curriculum_fields = ["Objetivos", "Contenidos", "Indicadores", "Actividades"]
+            cols = list(st.session_state.curriculum_df.columns)
+            new_mapping = {}
+            for field in curriculum_fields:
+                selection = st.selectbox(f"Columna para '{field}'", ["-- Ninguna --"] + cols, index=0, key=f"map_curr_{field}")
+                if selection != "-- Ninguna --":
+                    new_mapping[selection] = field
+            if st.button("Aplicar mapeo currículo"):
+                try:
+                    mapped = st.session_state.curriculum_df.rename(columns=new_mapping)
+                    st.session_state.curriculum_df = mapped
+                    st.session_state.curriculum_column_mapping = new_mapping
+                    st.success("Mapeo aplicado al currículo.")
+                    st.dataframe(st.session_state.curriculum_df.head(10), use_container_width=True)
+                except Exception as e:
+                    st.error(f"Error aplicando mapeo: {e}")
 
         st.success("Curriculum configuration will guide Gemma 4 recommendations.")
         st.session_state.curriculum_source = curriculum_source
@@ -207,14 +231,34 @@ elif st.session_state.screen == "index":
 
         if uploaded_file:
             try:
-                df = read_uploaded_file(uploaded_file)
-                missing = validate_file(df)
-                if missing:
-                    st.error("Missing required columns: " + ", ".join(missing))
-                else:
-                    st.session_state.df = df
-                    st.success("File uploaded successfully.")
-                    st.dataframe(df.head(10), use_container_width=True)
+                saved_path = save_uploaded_file(uploaded_file, UPLOAD_DIR)
+                df = load_uploaded_dataframe(uploaded_file)
+                st.session_state.df = df
+                st.success(f"File uploaded and saved to: {saved_path}")
+                st.dataframe(df.head(10), use_container_width=True)
+
+                # Column mapping UI for required columns
+                st.markdown("### Mapear columnas del archivo de alumnos")
+                cols = list(df.columns)
+                mapping = {}
+                for req in required_columns:
+                    sel = st.selectbox(f"Columna para '{req}'", ["-- Ninguna --"] + cols, index=0, key=f"map_student_{req}")
+                    if sel != "-- Ninguna --":
+                        mapping[sel] = req
+
+                if st.button("Aplicar mapeo de alumnos"):
+                    try:
+                        mapped_df = df.rename(columns=mapping)
+                        missing = validate_file(mapped_df)
+                        if missing:
+                            st.error("Faltan columnas requeridas después del mapeo: " + ", ".join(missing))
+                        else:
+                            st.session_state.df = mapped_df
+                            st.session_state.student_column_mapping = mapping
+                            st.success("Mapeo aplicado y datos cargados.")
+                            st.dataframe(mapped_df.head(10), use_container_width=True)
+                    except Exception as e:
+                        st.error(f"Error aplicando mapeo de alumnos: {e}")
             except Exception as e:
                 st.error(f"Error reading file: {e}")
         else:
