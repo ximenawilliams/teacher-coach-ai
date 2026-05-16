@@ -1,6 +1,7 @@
 
 import streamlit as st
 import pandas as pd
+import ollama
 from io import BytesIO
 from pathlib import Path
 
@@ -69,6 +70,47 @@ def save_uploaded_file(uploaded_file, save_dir):
 def validate_file(df):
     return [col for col in required_columns if col not in df.columns]
 
+def get_gemma_recommendation(row):
+    prompt = f"""
+Eres Gemma 4, una IA que ayuda a docentes a mejorar el aprendizaje de estudiantes.
+Datos del estudiante:
+- Nombre: {row.get('Student', '')}
+- Grado: {row.get('Grade', '')}
+- Asignatura: {row.get('Subject', '')}
+- Tema: {row.get('Topic', '')}
+- Competencia: {row.get('Competency', '')}
+- Puntuación: {row.get('Score', '')}
+- Asistencia: {row.get('Attendance', '')}
+
+Genera una recomendación práctica y breve para el docente. Indica qué reforzar en clase y qué tipo de actividad utilizar.
+"""
+    try:
+        response = ollama.chat(
+            model="gemma4",
+            messages=[
+                {"role": "system", "content": "Eres un asistente educativo para maestros."},
+                {"role": "user", "content": prompt}
+            ]
+        )
+        return response.get("message", {}).get("content", "").strip()
+    except Exception as e:
+        return f"Error generando recomendación: {e}"
+
+
+def generate_gemma_recommendations(df):
+    recommendations = []
+    total = len(df)
+    progress = st.progress(0)
+    for index, row in enumerate(df.to_dict(orient="records"), start=1):
+        recommendation = get_gemma_recommendation(row)
+        recommendations.append(recommendation)
+        if total > 0:
+            progress.progress(int(index / total * 100))
+    progress.progress(100)
+    progress.empty()
+    return recommendations
+
+
 def analyze_students(df):
     df = df.copy()
     df["Score"] = pd.to_numeric(df["Score"], errors="coerce")
@@ -83,14 +125,7 @@ def analyze_students(df):
 
     df["Risk_Level"] = df.apply(risk, axis=1)
 
-    def rec(row):
-        if row["Risk_Level"] == "High":
-            return f"Provide individual reinforcement in {row['Topic']}. Use visual examples, simple activities, and short practice sessions."
-        if row["Risk_Level"] == "Medium":
-            return f"Monitor progress in {row['Topic']} and assign guided exercises during the week."
-        return f"Continue strengthening {row['Topic']} with enrichment activities."
-
-    df["Gemma_4_Recommendation"] = df.apply(rec, axis=1)
+    df["Gemma_4_Recommendation"] = generate_gemma_recommendations(df)
 
     summary = {
         "students": df["Student"].nunique(),
@@ -125,7 +160,7 @@ if "curriculum_instructions" not in st.session_state:
 if "username" not in st.session_state:
     st.session_state.username = ""
 if "password" not in st.session_state:
-    st.session_state.password = ""
+    st.session_state.password = "admin"
 
 st.markdown("<div class='title'>📚 Teacher Coach AI</div>", unsafe_allow_html=True)
 st.markdown("<div class='subtitle'>Offline educational assistant powered by Gemma 4 for rural and underserved schools.</div>", unsafe_allow_html=True)
@@ -141,7 +176,7 @@ if st.session_state.screen == "login":
         st.markdown("<div class='card'>", unsafe_allow_html=True)
         st.markdown("### Teacher Login")
         username = st.text_input("Usuario", value=st.session_state.get("username", ""))
-        password = st.text_input("Contraseña", type="password", value=st.session_state.get("password", ""))
+        password = st.text_input("Contraseña", type="password", value=st.session_state.get("password", "admin"))
         if st.button("Entrar", use_container_width=True):
             if username == "admin" and password == "admin":
                 st.session_state.username = username
@@ -264,11 +299,24 @@ elif st.session_state.screen == "index":
         else:
             st.info("No file uploaded yet. The app will use sample student data for the demo.")
 
+        st.info("La recomendación con Gemma 4 puede tardar varios segundos por cada estudiante.")
         if st.button("Analyze gaps with Gemma 4", use_container_width=True):
-            final_df, summary = analyze_students(st.session_state.df)
-            st.session_state.analysis = {"df": final_df, "summary": summary}
-            st.session_state.screen = "dashboard"
-            st.rerun()
+            missing = validate_file(st.session_state.df)
+            if missing:
+                st.error("Faltan columnas requeridas antes de analizar: " + ", ".join(missing))
+            else:
+                try:
+                    final_df, summary = analyze_students(st.session_state.df)
+                    errors = [r for r in final_df["Gemma_4_Recommendation"] if isinstance(r, str) and r.startswith("Error generando recomendación:")]
+                    if errors:
+                        st.error("Ocurrió un error en la generación de recomendaciones de Ollama. Revisa que el modelo gemma4 esté instalado y disponible.")
+                        for err in errors[:3]:
+                            st.warning(err)
+                    st.session_state.analysis = {"df": final_df, "summary": summary}
+                    st.session_state.screen = "dashboard"
+                    st.rerun()
+                except Exception as e:
+                    st.error("Error al generar las recomendaciones: " + str(e))
 
 elif st.session_state.screen == "dashboard":
     df = st.session_state.analysis["df"]

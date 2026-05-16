@@ -1,76 +1,61 @@
-# Teacher Coach AI
+Agrega esta sección en tu `README.md` debajo de **Technology Stack** o **How It Works**:
 
-Teacher Coach AI is an AI-powered educational assistant designed to support teachers in underserved and low-resource schools.
+````markdown
+## Local Gemma Integration with Ollama
 
-The platform helps educators analyze student performance, identify learning gaps, and generate curriculum-aware reinforcement recommendations using Gemma.
+Teacher Coach AI supports local AI inference using Ollama and Gemma models.
 
----
+The application can run educational recommendations locally without depending entirely on cloud infrastructure, making it suitable for low-resource schools and environments with limited connectivity.
 
-## Problem
+### Ollama Integration
 
-In many underserved communities, teachers manage overcrowded classrooms with limited access to:
+The Streamlit application connects to Gemma through Ollama using Python.
 
-- Educational advisors
-- Analytics tools
-- Personalized learning support
-- Reliable internet connectivity
+Example integration:
 
-This makes individualized academic reinforcement difficult to provide consistently.
+```python
+import ollama
 
----
+response = ollama.chat(
+    model="gemma3:1b",
+    messages=[
+        {
+            "role": "user",
+            "content": prompt
+        }
+    ]
+)
 
-## Solution
+recommendation = response["message"]["content"]
+```
 
-Teacher Coach AI combines:
+### Workflow
 
-- Curriculum configuration
-- Student performance analysis
-- Learning gap detection
-- AI-generated educational recommendations
+1. Teacher uploads student performance data
+2. The system detects learning gaps
+3. Teacher Coach AI builds an educational prompt
+4. Ollama sends the prompt to Gemma
+5. Gemma generates reinforcement recommendations for the teacher
 
-to support teachers with practical and personalized guidance.
+### Benefits
 
-The platform is designed with an offline-first approach and can run on affordable hardware.
+- Local AI execution
+- Offline-first approach
+- Low infrastructure requirements
+- Privacy-friendly educational analysis
+- Designed for affordable computers and tablets
 
----
+### Requirements
 
-## Features
-
-- Upload curriculum configuration using CSV/Excel
-- Upload student performance data
-- Detect students with learning gaps
-- Generate curriculum-aware recommendations
-- AI-powered educational reinforcement
-- Simple teacher dashboard
-- Designed for low-resource environments
-
----
-
-## Technology Stack
-
+- Ollama
+- Gemma model installed locally
 - Python
 - Streamlit
-- Pandas
-- Jupyter Notebook
-- Google Generative AI
-- Gemma
 
----
+Example:
 
-## Project Structure
-
-```text
-teacher-coach-ai/
-│
-├── app.py
-├── requirements.txt
-├── README.md
-│
-├── data/
-│   ├── admin_curriculum_example.csv
-│   └── student_scores.csv
-│
-├── kaggle/
-│   └── teacher_coach_ai_gemma_demo.ipynb
-│
-└── docs/
+```bash
+ollama pull gemma3:1b
+streamlit run app.py
+```
+````
