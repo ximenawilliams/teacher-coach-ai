@@ -5,12 +5,34 @@ import ollama
 from io import BytesIO
 from pathlib import Path
 
+if "curriculum_df" not in st.session_state:
+    st.session_state.curriculum_df = pd.read_csv("data/admin_curriculum_example.csv")
+
 CURRICULUM_UPLOAD_DIR = Path("curriculum_uploads")
 CURRICULUM_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 UPLOAD_DIR = Path("uploads")
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 st.set_page_config(page_title="Teacher Coach AI", page_icon="📚", layout="wide")
+
+
+# =========================
+# Gemma Model Configuration
+# =========================
+
+OLLAMA_MODELS = [
+    "gemma4",
+    "gemma3:1b",
+    "gemma3:4b",
+]
+
+selected_model = st.sidebar.selectbox(
+    "Select Gemma/Ollama model",
+    OLLAMA_MODELS,
+    index=0
+)
+
+st.session_state.selected_model = selected_model
 
 st.markdown("""
 <style>
@@ -70,9 +92,67 @@ def save_uploaded_file(uploaded_file, save_dir):
 def validate_file(df):
     return [col for col in required_columns if col not in df.columns]
 
+def load_default_curriculum():
+    default_path = Path("admin_curriculum_example.csv")
+    if default_path.exists():
+        try:
+            if default_path.suffix.lower() == ".csv":
+                return pd.read_csv(default_path)
+            return pd.read_excel(default_path)
+        except Exception:
+            return None
+    return None
+
+def build_curriculum_description():
+    curriculum_df = st.session_state.get("curriculum_df")
+
+    if curriculum_df is None or curriculum_df.empty:
+        return "Use general teaching recommendations aligned with the uploaded student data."
+
+    text = "Curriculum base:\n"
+
+    for _, row in curriculum_df.head(5).iterrows():
+        subject = row.get("Subject", "")
+        topic = row.get("Topic", "")
+        objective = row.get("Objective", "")
+
+        text += f"- Subject: {subject}, Topic: {topic}, Objective: {objective}\n"
+
+    return text
+
+    curriculum_fields = ["Objetivos", "Contenidos", "Indicadores", "Actividades"]
+    available = [c for c in curriculum_fields if c in curriculum_df.columns]
+    if not available:
+        available = list(curriculum_df.columns[:4])
+    rows = curriculum_df[available].head(5).fillna("").to_dict(orient="records")
+    lines = ["Curriculum guidelines:"]
+    for index, row in enumerate(rows, start=1):
+        parts = [f"{field}: {row[field]}" for field in available if row.get(field)]
+        if parts:
+            lines.append(f"{index}. " + "; ".join(parts))
+    if len(lines) <= 1:
+        return None
+    lines.append("Use este currículo para validar brechas de aprendizaje y proponer actividades alineadas o complementarias.")
+    return "\n".join(lines)
+
 def get_gemma_recommendation(row):
+    curriculum_description = build_curriculum_description()
+
+    selected_model = st.session_state.get("selected_model", "gemma4")
+
     prompt = f"""
-Eres Gemma 4, una IA que ayuda a docentes a mejorar el aprendizaje de estudiantes.
+Responde SOLO con este formato.
+No saludes.
+No digas "Hola".
+No digas "Como Gemma".
+No expliques que eres una IA.
+
+Brecha de aprendizaje:
+Actividad de refuerzo:
+Guía para el docente:
+
+Máximo 80 palabras.
+
 Datos del estudiante:
 - Nombre: {row.get('Student', '')}
 - Grado: {row.get('Grade', '')}
@@ -81,22 +161,53 @@ Datos del estudiante:
 - Competencia: {row.get('Competency', '')}
 - Puntuación: {row.get('Score', '')}
 - Asistencia: {row.get('Attendance', '')}
-
-Genera una recomendación práctica y breve para el docente. Indica qué reforzar en clase y qué tipo de actividad utilizar.
 """
+
+    if curriculum_description:
+        prompt += f"""
+Ten en cuenta el siguiente currículo escolar al generar la recomendación:
+
+{curriculum_description}
+
+Valida la brecha de aprendizaje del estudiante con base en este currículo.
+Sugiere actividades alineadas a los objetivos, contenidos e indicadores.
+Si la brecha no puede cubrirse directamente con el currículo, sugiere actividades complementarias que respeten los objetivos del mismo.
+"""
+    else:
+        prompt += """
+No se encontró un currículo específico.
+Genera recomendaciones pedagógicas abiertas usando buenas prácticas educativas para aulas con recursos limitados.
+No asumas acceso a internet ni materiales costosos.
+"""
+
+    prompt += """
+Genera una recomendación práctica y breve para el docente.
+
+Incluye:
+1. Brecha de aprendizaje
+2. Actividad de refuerzo
+3. Guía breve para el docente
+"""
+
     try:
         response = ollama.chat(
-            model="gemma4",
+            model=selected_model,
             messages=[
-                {"role": "system", "content": "Eres un asistente educativo para maestros."},
-                {"role": "user", "content": prompt}
+                {
+                    "role": "system",
+                    "content": "Eres un asistente educativo. Respondes de forma breve, directa y estructurada. No saludas."
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
             ]
         )
+
         return response.get("message", {}).get("content", "").strip()
+
     except Exception as e:
-        return f"Error generando recomendación: {e}"
-
-
+        return f"Error generando recomendación con el modelo '{selected_model}': {e}"
 def generate_gemma_recommendations(df):
     recommendations = []
     total = len(df)
@@ -161,6 +272,10 @@ if "username" not in st.session_state:
     st.session_state.username = ""
 if "password" not in st.session_state:
     st.session_state.password = "admin"
+if "active_tab" not in st.session_state:
+    st.session_state.active_tab = 0
+if "force_curriculum_view" not in st.session_state:
+    st.session_state.force_curriculum_view = False
 
 st.markdown("<div class='title'>📚 Teacher Coach AI</div>", unsafe_allow_html=True)
 st.markdown("<div class='subtitle'>Offline educational assistant powered by Gemma 4 for rural and underserved schools.</div>", unsafe_allow_html=True)
@@ -190,9 +305,8 @@ if st.session_state.screen == "login":
 
 elif st.session_state.screen == "index":
     st.markdown("<span class='badge'>🤖 Gemma 4 Analysis Setup</span>", unsafe_allow_html=True)
-    tab1, tab2 = st.tabs(["Teacher Upload", "Admin Curriculum"])
-
-    with tab2:
+    
+    if st.session_state.force_curriculum_view:
         st.markdown("## Admin Curriculum Configuration")
         st.write("Upload MEDUCA content, national curriculum, school director guidelines, or the teacher's base lesson plan. This becomes the minimum educational framework Gemma 4 must follow.")
         curriculum_source = st.selectbox(
@@ -226,7 +340,6 @@ elif st.session_state.screen == "index":
             st.dataframe(st.session_state.curriculum_df.head(10), use_container_width=True)
             st.markdown("**Columnas del currículo:** " + ", ".join(st.session_state.curriculum_df.columns))
             st.markdown("### Mapear columnas del currículo")
-            # Campos objetivos que queremos mapear
             curriculum_fields = ["Objetivos", "Contenidos", "Indicadores", "Actividades"]
             cols = list(st.session_state.curriculum_df.columns)
             new_mapping = {}
@@ -249,74 +362,161 @@ elif st.session_state.screen == "index":
         st.session_state.curriculum_grade = grade_level
         st.session_state.curriculum_subject = subject
         st.session_state.curriculum_instructions = curriculum_instructions
+        
+        if st.button("✅ Volver a Teacher Upload", use_container_width=True, key="back_to_upload"):
+            st.session_state.force_curriculum_view = False
+            st.rerun()
+    else:
+        tab1, tab2 = st.tabs(["Teacher Upload", "Admin Curriculum"])
 
-    if st.button("Cerrar sesión", key="logout_index", help="Volver al login"): 
-        st.session_state.screen = "login"
-        st.session_state.logged_in = False
-        st.session_state.username = ""
-        st.session_state.password = ""
-        st.rerun()
+        with tab2:
+            st.markdown("## Admin Curriculum Configuration")
+            st.write("Upload MEDUCA content, national curriculum, school director guidelines, or the teacher's base lesson plan. This becomes the minimum educational framework Gemma 4 must follow.")
+            curriculum_source = st.selectbox(
+                "Curriculum source",
+                ["MEDUCA", "National Ministry of Education", "School Director Guidelines", "Teacher Base Plan", "Regional Curriculum"],
+                index=["MEDUCA", "National Ministry of Education", "School Director Guidelines", "Teacher Base Plan", "Regional Curriculum"].index(st.session_state.curriculum_source),
+            )
+            grade_level = st.text_input("Grade level", value=st.session_state.curriculum_grade)
+            subject = st.text_input("Subject", value=st.session_state.curriculum_subject)
+            uploaded_curriculum = st.file_uploader("Browse curriculum file", type=["xlsx", "csv", "pdf", "docx"])
+            curriculum_instructions = st.text_area("Curriculum alignment instructions", value=st.session_state.curriculum_instructions)
 
-    with tab1:
-        st.markdown("## Upload Student Performance Data")
-        st.write("Upload an Excel or CSV file with student grades, attendance, subjects, topics, and competencies.")
-        st.download_button("Download Excel Template", data=create_template(), file_name="teacher_coach_ai_template.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-        uploaded_file = st.file_uploader("Browse student Excel or CSV file", type=["xlsx", "csv"])
-        st.text_area("Additional teacher instructions for Gemma 4", value="Focus on students with low attendance and low scores. Recommend simple activities that do not require internet or expensive materials.")
-
-        if uploaded_file:
-            try:
-                saved_path = save_uploaded_file(uploaded_file, UPLOAD_DIR)
-                df = load_uploaded_dataframe(uploaded_file)
-                st.session_state.df = df
-                st.success(f"File uploaded and saved to: {saved_path}")
-                st.dataframe(df.head(10), use_container_width=True)
-
-                # Column mapping UI for required columns
-                st.markdown("### Mapear columnas del archivo de alumnos")
-                cols = list(df.columns)
-                mapping = {}
-                for req in required_columns:
-                    sel = st.selectbox(f"Columna para '{req}'", ["-- Ninguna --"] + cols, index=0, key=f"map_student_{req}")
-                    if sel != "-- Ninguna --":
-                        mapping[sel] = req
-
-                if st.button("Aplicar mapeo de alumnos"):
+            if uploaded_curriculum:
+                saved_path = save_uploaded_file(uploaded_curriculum, CURRICULUM_UPLOAD_DIR)
+                st.session_state.curriculum_file_path = str(saved_path)
+                if uploaded_curriculum.name.lower().endswith((".csv", ".xlsx", ".xls")):
                     try:
-                        mapped_df = df.rename(columns=mapping)
-                        missing = validate_file(mapped_df)
-                        if missing:
-                            st.error("Faltan columnas requeridas después del mapeo: " + ", ".join(missing))
-                        else:
-                            st.session_state.df = mapped_df
-                            st.session_state.student_column_mapping = mapping
-                            st.success("Mapeo aplicado y datos cargados.")
-                            st.dataframe(mapped_df.head(10), use_container_width=True)
+                        curriculum_df = load_uploaded_dataframe(uploaded_curriculum)
+                        st.session_state.curriculum_df = curriculum_df
+                        st.success(f"Currículo guardado en: {saved_path}")
                     except Exception as e:
-                        st.error(f"Error aplicando mapeo de alumnos: {e}")
-            except Exception as e:
-                st.error(f"Error reading file: {e}")
-        else:
-            st.info("No file uploaded yet. The app will use sample student data for the demo.")
+                        st.session_state.curriculum_df = None
+                        st.error(f"Error leyendo el archivo de currículo: {e}")
+                else:
+                    st.info(f"Archivo guardado en: {saved_path}")
 
-        st.info("La recomendación con Gemma 4 puede tardar varios segundos por cada estudiante.")
-        if st.button("Analyze gaps with Gemma 4", use_container_width=True):
-            missing = validate_file(st.session_state.df)
-            if missing:
-                st.error("Faltan columnas requeridas antes de analizar: " + ", ".join(missing))
-            else:
+            if st.session_state.curriculum_file_path:
+                st.info(f"Archivo de currículo cargado: {st.session_state.curriculum_file_path}")
+            if st.session_state.curriculum_df is not None:
+                st.markdown("### Vista previa del currículo")
+                st.dataframe(st.session_state.curriculum_df.head(10), use_container_width=True)
+                st.markdown("**Columnas del currículo:** " + ", ".join(st.session_state.curriculum_df.columns))
+                st.markdown("### Mapear columnas del currículo")
+                curriculum_fields = ["Objetivos", "Contenidos", "Indicadores", "Actividades"]
+                cols = list(st.session_state.curriculum_df.columns)
+                new_mapping = {}
+                for field in curriculum_fields:
+                    selection = st.selectbox(f"Columna para '{field}'", ["-- Ninguna --"] + cols, index=0, key=f"map_curr_{field}")
+                    if selection != "-- Ninguna --":
+                        new_mapping[selection] = field
+                if st.button("Aplicar mapeo currículo"):
+                    try:
+                        mapped = st.session_state.curriculum_df.rename(columns=new_mapping)
+                        st.session_state.curriculum_df = mapped
+                        st.session_state.curriculum_column_mapping = new_mapping
+                        st.success("Mapeo aplicado al currículo.")
+                        st.dataframe(st.session_state.curriculum_df.head(10), use_container_width=True)
+                    except Exception as e:
+                        st.error(f"Error aplicando mapeo: {e}")
+
+            st.success("Curriculum configuration will guide Gemma 4 recommendations.")
+            st.session_state.curriculum_source = curriculum_source
+            st.session_state.curriculum_grade = grade_level
+            st.session_state.curriculum_subject = subject
+            st.session_state.curriculum_instructions = curriculum_instructions
+
+        if st.button("Cerrar sesión", key="logout_index", help="Volver al login"): 
+            st.session_state.screen = "login"
+            st.session_state.logged_in = False
+            st.session_state.username = ""
+            st.session_state.password = ""
+            st.rerun()
+
+        with tab1:
+            st.markdown("## Upload Student Performance Data")
+            st.write("Upload an Excel or CSV file with student grades, attendance, subjects, topics, and competencies.")
+            st.download_button("Download Excel Template", data=create_template(), file_name="teacher_coach_ai_template.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            uploaded_file = st.file_uploader("Browse student Excel or CSV file", type=["xlsx", "csv"])
+            st.text_area("Additional teacher instructions for Gemma 4", value="Focus on students with low attendance and low scores. Recommend simple activities that do not require internet or expensive materials.")
+
+            if uploaded_file:
                 try:
-                    final_df, summary = analyze_students(st.session_state.df)
-                    errors = [r for r in final_df["Gemma_4_Recommendation"] if isinstance(r, str) and r.startswith("Error generando recomendación:")]
-                    if errors:
-                        st.error("Ocurrió un error en la generación de recomendaciones de Ollama. Revisa que el modelo gemma4 esté instalado y disponible.")
-                        for err in errors[:3]:
-                            st.warning(err)
-                    st.session_state.analysis = {"df": final_df, "summary": summary}
-                    st.session_state.screen = "dashboard"
-                    st.rerun()
+                    saved_path = save_uploaded_file(uploaded_file, UPLOAD_DIR)
+                    df = load_uploaded_dataframe(uploaded_file)
+                    st.session_state.df = df
+                    st.success(f"File uploaded and saved to: {saved_path}")
+                    st.dataframe(df.head(10), use_container_width=True)
+
+                    # Column mapping UI for required columns
+                    st.markdown("### Mapear columnas del archivo de alumnos")
+                    cols = list(df.columns)
+                    mapping = {}
+                    for req in required_columns:
+                        sel = st.selectbox(f"Columna para '{req}'", ["-- Ninguna --"] + cols, index=0, key=f"map_student_{req}")
+                        if sel != "-- Ninguna --":
+                            mapping[sel] = req
+
+                    if st.button("Aplicar mapeo de alumnos"):
+                        try:
+                            mapped_df = df.rename(columns=mapping)
+                            missing = validate_file(mapped_df)
+                            if missing:
+                                st.error("Faltan columnas requeridas después del mapeo: " + ", ".join(missing))
+                            else:
+                                st.session_state.df = mapped_df
+                                st.session_state.student_column_mapping = mapping
+                                st.success("Mapeo aplicado y datos cargados.")
+                                st.dataframe(mapped_df.head(10), use_container_width=True)
+                        except Exception as e:
+                            st.error(f"Error aplicando mapeo de alumnos: {e}")
                 except Exception as e:
-                    st.error("Error al generar las recomendaciones: " + str(e))
+                    st.error(f"Error reading file: {e}")
+            else:
+                st.info("No file uploaded yet. The app will use sample student data for the demo.")
+
+            st.info("La recomendación con Gemma 4 puede tardar varios segundos por cada estudiante.")
+            if st.button("Analyze gaps with Gemma 4", use_container_width=True):
+                missing = validate_file(st.session_state.df)
+                if missing:
+                    st.error("Faltan columnas requeridas antes de analizar: " + ", ".join(missing))
+                else:
+                    curriculum_exists = Path("admin_curriculum_example.csv").exists() or st.session_state.curriculum_df is not None
+                    if not curriculum_exists:
+                        st.warning("⚠️ No se encontró un currículo adjunto (admin_curriculum_example.csv).")
+                        st.info("Se realizará una evaluación sin currículo, lo que limitará las recomendaciones a buenas prácticas generales.")
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            if st.button("✅ Sí, continuar sin currículo", use_container_width=True, key="continue_no_curriculum"):
+                                try:
+                                    final_df, summary = analyze_students(st.session_state.df)
+                                    errors = [r for r in final_df["Gemma_4_Recommendation"] if isinstance(r, str) and r.startswith("Error generando recomendación:")]
+                                    if errors:
+                                        st.error("Ocurrió un error en la generación de recomendaciones de Ollama. Revisa que el modelo gemma4 esté instalado y disponible.")
+                                        for err in errors[:3]:
+                                            st.warning(err)
+                                    st.session_state.analysis = {"df": final_df, "summary": summary}
+                                    st.session_state.screen = "dashboard"
+                                    st.rerun()
+                                except Exception as e:
+                                    st.error("Error al generar las recomendaciones: " + str(e))
+                        with col2:
+                            if st.button("❌ No, quiero adjuntar un currículo", use_container_width=True, key="attach_curriculum"):
+                                st.session_state.force_curriculum_view = True
+                                st.rerun()
+                    else:
+                        try:
+                            final_df, summary = analyze_students(st.session_state.df)
+                            errors = [r for r in final_df["Gemma_4_Recommendation"] if isinstance(r, str) and r.startswith("Error generando recomendación:")]
+                            if errors:
+                                st.error("Ocurrió un error en la generación de recomendaciones de Ollama. Revisa que el modelo gemma4 esté instalado y disponible.")
+                                for err in errors[:3]:
+                                    st.warning(err)
+                            st.session_state.analysis = {"df": final_df, "summary": summary}
+                            st.session_state.screen = "dashboard"
+                            st.rerun()
+                        except Exception as e:
+                            st.error("Error al generar las recomendaciones: " + str(e))
 
 elif st.session_state.screen == "dashboard":
     df = st.session_state.analysis["df"]
