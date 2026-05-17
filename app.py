@@ -18,14 +18,14 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 st.set_page_config(page_title="Teacher Coach AI", page_icon="📚", layout="wide")
 
-# =========================
-# Gemma Model Configuration
-# =========================
+# ==========================================
+# Gemma Model Configuration (Official V4)
+# ==========================================
 OLLAMA_MODELS = [
-    "gemma2:2b",
-    "gemma4",
-    "gemma3:1b",
-    "gemma3:4b",
+    "gemma4:e2b",  # Lightweight Edge model (Default)
+    "gemma4:e4b",  # Medium Edge model
+    "gemma4:26b",  # Heavy reasoning model
+    "gemma4:31b",  # Advanced reasoning model
 ]
 
 selected_model = st.sidebar.selectbox(
@@ -94,17 +94,7 @@ def save_uploaded_file(uploaded_file, save_dir):
 def validate_file(df):
     return [col for col in required_columns if col not in df.columns]
 
-def load_default_curriculum():
-    default_path = Path("admin_curriculum_example.csv")
-    if default_path.exists():
-        try:
-            if default_path.suffix.lower() == ".csv":
-                return pd.read_csv(default_path)
-            return pd.read_excel(default_path)
-        except Exception:
-            return None
-    return None
-
+# Executed safely on the Main Thread
 def build_curriculum_description():
     curriculum_df = st.session_state.get("curriculum_df")
 
@@ -112,8 +102,6 @@ def build_curriculum_description():
         return "Use general teaching recommendations aligned with the uploaded student data."
 
     text = "Curriculum guidelines found:\n"
-    
-    # Updated to look for English column names after mapping
     target_columns = ["Subject", "Topic", "Objectives", "Contents", "Indicators", "Activities"]
     available_cols = [c for c in target_columns if c in curriculum_df.columns]
     
@@ -128,10 +116,8 @@ def build_curriculum_description():
     text += "\nUse this curriculum to validate learning gaps and propose aligned activities."
     return text
 
-def get_gemma_recommendation(row):
-    curriculum_description = build_curriculum_description()
-    selected_model = st.session_state.get("selected_model", "gemma2:2b")
-
+# Thread-safe function: All context is explicitly passed as arguments
+def get_gemma_recommendation(row, model_name, curriculum_description):
     prompt = f"""
 Respond ONLY with this format.
 Do not greet.
@@ -183,7 +169,7 @@ Include:
 
     try:
         response = ollama.chat(
-            model=selected_model,
+            model=model_name,
             messages=[
                 {
                     "role": "system",
@@ -199,7 +185,8 @@ Include:
     except Exception as e:
         return f"Error generating recommendation: {e}"
 
-def generate_gemma_recommendations(df):
+# Thread-safe execution pipeline
+def generate_gemma_recommendations(df, model_name, curriculum_description):
     records = df.to_dict(orient="records")
     total = len(records)
     progress = st.progress(0)
@@ -209,8 +196,9 @@ def generate_gemma_recommendations(df):
     completed = 0
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+        # Explicitly passing model_name and curriculum_description to the worker threads
         future_to_index = {
-            executor.submit(get_gemma_recommendation, row): i 
+            executor.submit(get_gemma_recommendation, row, model_name, curriculum_description): i 
             for i, row in enumerate(records)
         }
         
@@ -223,14 +211,14 @@ def generate_gemma_recommendations(df):
             
             completed += 1
             progress.progress(int(completed / total * 100))
-            status_text.text(f"⚡ Processing with threads: {completed} of {total} students completed...")
+            status_text.text(f"⚡ Processing with threads: {completed} of {total} students completed using {model_name}...")
             
     progress.empty()
     status_text.empty()
     return recommendations
 
 
-def analyze_students(df):
+def analyze_students(df, model_name, curriculum_description):
     df = df.copy()
     df["Score"] = pd.to_numeric(df["Score"], errors="coerce")
     df["Attendance"] = pd.to_numeric(df["Attendance"], errors="coerce")
@@ -243,7 +231,7 @@ def analyze_students(df):
         return "Low"
 
     df["Risk_Level"] = df.apply(risk, axis=1)
-    df["Gemma_4_Recommendation"] = generate_gemma_recommendations(df)
+    df["Gemma_4_Recommendation"] = generate_gemma_recommendations(df, model_name, curriculum_description)
 
     summary = {
         "students": df["Student"].nunique(),
@@ -502,7 +490,14 @@ elif st.session_state.screen == "index":
                         st.error("Missing required columns before analysis: " + ", ".join(missing))
                     else:
                         try:
-                            final_df, summary = analyze_students(st.session_state.df)
+                            # CRITICAL ARCHITECTURAL FIX: 
+                            # We build the RAG text and fetch model name on the MAIN THREAD before spawning workers
+                            curr_desc = build_curriculum_description()
+                            model_name = st.session_state.get("selected_model", "gemma4:e2b")
+                            
+                            final_df, summary = analyze_students(st.session_state.df, model_name, curr_desc)
+                            
+                            # Clean error tracking mapped to the correct dynamic variable
                             errors = [r for r in final_df["Gemma_4_Recommendation"] if isinstance(r, str) and r.startswith("Error generating recommendation:")]
                             if errors:
                                 st.error("An error occurred during Ollama recommendation generation. Please check model availability.")
@@ -538,7 +533,7 @@ elif st.session_state.screen == "dashboard":
         st.markdown(f"<div class='metric'><div class='metric-label'>Weakest subject</div><div class='metric-value' style='font-size:24px'>{summary['weakest_subject']}</div></div>", unsafe_allow_html=True)
 
     st.markdown("## Weak Learning Areas")
-    st.bar_chart(df.groupby("Topic")["Score"].mean().sort_values())
+    st.bar_chart(df.groupby("Subject")["Score"].mean().sort_values())
 
     st.markdown("## Recommendations per Student")
     st.dataframe(df[["Student", "Grade", "Subject", "Topic", "Competency", "Score", "Attendance", "Risk_Level", "Gemma_4_Recommendation"]], use_container_width=True)
