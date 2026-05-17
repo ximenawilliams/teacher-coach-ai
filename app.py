@@ -3,6 +3,7 @@ import pandas as pd
 import ollama
 from io import BytesIO
 from pathlib import Path
+import concurrent.futures
 
 if "curriculum_df" not in st.session_state:
     try:
@@ -200,16 +201,38 @@ Incluye:
         return f"Error generando recomendación con el modelo '{selected_model}': {e}"
 
 def generate_gemma_recommendations(df):
-    recommendations = []
-    total = len(df)
+    records = df.to_dict(orient="records")
+    total = len(records)
     progress = st.progress(0)
-    for index, row in enumerate(df.to_dict(orient="records"), start=1):
-        recommendation = get_gemma_recommendation(row)
-        recommendations.append(recommendation)
-        if total > 0:
-            progress.progress(int(index / total * 100))
-    progress.progress(100)
+    status_text = st.empty()
+    
+    # Pre-reservamos el tamaño de la lista para mantener el orden exacto del DataFrame
+    recommendations = [None] * total
+    completed = 0
+
+    # Usamos ThreadPoolExecutor. max_workers=3 protege la máquina local de saturarse
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+        # Mapeamos cada tarea a su índice original para no mezclar las respuestas
+        future_to_index = {
+            executor.submit(get_gemma_recommendation, row): i 
+            for i, row in enumerate(records)
+        }
+        
+        # A medida que los hilos van terminando, actualizamos la UI de Streamlit
+        for future in concurrent.futures.as_completed(future_to_index):
+            i = future_to_index[future]
+            try:
+                recommendations[i] = future.result()
+            except Exception as e:
+                recommendations[i] = f"Error generando recomendación: {e}"
+            
+            completed += 1
+            # La UI se actualiza en el hilo principal sin congelarse
+            progress.progress(int(completed / total * 100))
+            status_text.text(f"⚡ Procesando con hilos: {completed} de {total} estudiantes completados...")
+            
     progress.empty()
+    status_text.empty()
     return recommendations
 
 
