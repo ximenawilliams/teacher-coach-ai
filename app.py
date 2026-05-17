@@ -21,7 +21,6 @@ st.set_page_config(page_title="Teacher Coach AI", page_icon="📚", layout="wide
 # =========================
 # Gemma Model Configuration
 # =========================
-# FIX 3: gemma2:2b añadido y puesto por defecto (index=0)
 OLLAMA_MODELS = [
     "gemma2:2b",
     "gemma4",
@@ -106,7 +105,6 @@ def load_default_curriculum():
             return None
     return None
 
-# FIX 1: Código muerto eliminado y mapeo dinámico reparado
 def build_curriculum_description():
     curriculum_df = st.session_state.get("curriculum_df")
 
@@ -115,7 +113,8 @@ def build_curriculum_description():
 
     text = "Curriculum guidelines found:\n"
     
-    target_columns = ["Subject", "Topic", "Objective", "Objetivos", "Contenidos", "Indicadores", "Actividades"]
+    # Updated to look for English column names after mapping
+    target_columns = ["Subject", "Topic", "Objectives", "Contents", "Indicators", "Activities"]
     available_cols = [c for c in target_columns if c in curriculum_df.columns]
     
     if not available_cols:
@@ -126,7 +125,7 @@ def build_curriculum_description():
         if parts:
             text += f"{index + 1}. " + "; ".join(parts) + "\n"
             
-    text += "\nUse este currículo para validar brechas de aprendizaje y proponer actividades alineadas."
+    text += "\nUse this curriculum to validate learning gaps and propose aligned activities."
     return text
 
 def get_gemma_recommendation(row):
@@ -134,52 +133,52 @@ def get_gemma_recommendation(row):
     selected_model = st.session_state.get("selected_model", "gemma2:2b")
 
     prompt = f"""
-Responde SOLO con este formato.
-No saludes.
-No digas "Hola".
-No digas "Como Gemma".
-No expliques que eres una IA.
+Respond ONLY with this format.
+Do not greet.
+Do not say "Hello".
+Do not say "As Gemma".
+Do not explain that you are an AI.
 
-Brecha de aprendizaje:
-Actividad de refuerzo:
-Guía para el docente:
+Learning Gap:
+Reinforcement Activity:
+Teacher Guide:
 
-Máximo 80 palabras.
+Maximum 80 words.
 
-Datos del estudiante:
-- Nombre: {row.get('Student', '')}
-- Grado: {row.get('Grade', '')}
-- Asignatura: {row.get('Subject', '')}
-- Tema: {row.get('Topic', '')}
-- Competencia: {row.get('Competency', '')}
-- Puntuación: {row.get('Score', '')}
-- Asistencia: {row.get('Attendance', '')}
+Student Data:
+- Name: {row.get('Student', '')}
+- Grade: {row.get('Grade', '')}
+- Subject: {row.get('Subject', '')}
+- Topic: {row.get('Topic', '')}
+- Competency: {row.get('Competency', '')}
+- Score: {row.get('Score', '')}
+- Attendance: {row.get('Attendance', '')}
 """
 
     if curriculum_description:
         prompt += f"""
-Ten en cuenta el siguiente currículo escolar al generar la recomendación:
+Take into account the following school curriculum when generating the recommendation:
 
 {curriculum_description}
 
-Valida la brecha de aprendizaje del estudiante con base en este currículo.
-Sugiere actividades alineadas a los objetivos, contenidos e indicadores.
-Si la brecha no puede cubrirse directamente con el currículo, sugiere actividades complementarias que respeten los objetivos del mismo.
+Validate the student's learning gap based on this curriculum.
+Suggest activities aligned with objectives, contents, and indicators.
+If the gap cannot be directly covered by the curriculum, suggest complementary activities that respect its objectives.
 """
     else:
         prompt += """
-No se encontró un currículo específico.
-Genera recomendaciones pedagógicas abiertas usando buenas prácticas educativas para aulas con recursos limitados.
-No asumas acceso a internet ni materiales costosos.
+No specific curriculum was found.
+Generate open pedagogical recommendations using educational best practices for low-resource classrooms.
+Do not assume internet access or expensive materials.
 """
 
     prompt += """
-Genera una recomendación práctica y breve para el docente.
+Generate a practical and brief recommendation for the teacher.
 
-Incluye:
-1. Brecha de aprendizaje
-2. Actividad de refuerzo
-3. Guía breve para el docente
+Include:
+1. Learning Gap
+2. Reinforcement Activity
+3. Brief guide for the teacher
 """
 
     try:
@@ -188,7 +187,7 @@ Incluye:
             messages=[
                 {
                     "role": "system",
-                    "content": "Eres un asistente educativo. Respondes de forma breve, directa y estructurada. No saludas."
+                    "content": "You are an educational assistant. You respond briefly, directly, and in a structured format. No greetings."
                 },
                 {
                     "role": "user",
@@ -198,7 +197,7 @@ Incluye:
         )
         return response.get("message", {}).get("content", "").strip()
     except Exception as e:
-        return f"Error generando recomendación con el modelo '{selected_model}': {e}"
+        return f"Error generating recommendation: {e}"
 
 def generate_gemma_recommendations(df):
     records = df.to_dict(orient="records")
@@ -206,30 +205,25 @@ def generate_gemma_recommendations(df):
     progress = st.progress(0)
     status_text = st.empty()
     
-    # Pre-reservamos el tamaño de la lista para mantener el orden exacto del DataFrame
     recommendations = [None] * total
     completed = 0
 
-    # Usamos ThreadPoolExecutor. max_workers=3 protege la máquina local de saturarse
     with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
-        # Mapeamos cada tarea a su índice original para no mezclar las respuestas
         future_to_index = {
             executor.submit(get_gemma_recommendation, row): i 
             for i, row in enumerate(records)
         }
         
-        # A medida que los hilos van terminando, actualizamos la UI de Streamlit
         for future in concurrent.futures.as_completed(future_to_index):
             i = future_to_index[future]
             try:
                 recommendations[i] = future.result()
             except Exception as e:
-                recommendations[i] = f"Error generando recomendación: {e}"
+                recommendations[i] = f"Error generating recommendation: {e}"
             
             completed += 1
-            # La UI se actualiza en el hilo principal sin congelarse
             progress.progress(int(completed / total * 100))
-            status_text.text(f"⚡ Procesando con hilos: {completed} de {total} estudiantes completados...")
+            status_text.text(f"⚡ Processing with threads: {completed} of {total} students completed...")
             
     progress.empty()
     status_text.empty()
@@ -249,7 +243,6 @@ def analyze_students(df):
         return "Low"
 
     df["Risk_Level"] = df.apply(risk, axis=1)
-
     df["Gemma_4_Recommendation"] = generate_gemma_recommendations(df)
 
     summary = {
@@ -290,7 +283,7 @@ if "force_curriculum_view" not in st.session_state:
     st.session_state.force_curriculum_view = False
 
 st.markdown("<div class='title'>📚 Teacher Coach AI</div>", unsafe_allow_html=True)
-st.markdown("<div class='subtitle'>Offline educational assistant powered by Gemma para escuelas rurales y de bajos recursos.</div>", unsafe_allow_html=True)
+st.markdown("<div class='subtitle'>Offline educational assistant powered by Gemma for rural and low-resource schools.</div>", unsafe_allow_html=True)
 
 if st.session_state.screen == "login":
     col1, col2 = st.columns([1.2, 0.8])
@@ -302,9 +295,9 @@ if st.session_state.screen == "login":
     with col2:
         st.markdown("<div class='card'>", unsafe_allow_html=True)
         st.markdown("### Teacher Login")
-        username = st.text_input("Usuario", value=st.session_state.get("username", ""))
-        password = st.text_input("Contraseña", type="password", value=st.session_state.get("password", "admin"))
-        if st.button("Entrar", use_container_width=True):
+        username = st.text_input("Username", value=st.session_state.get("username", ""))
+        password = st.text_input("Password", type="password", value=st.session_state.get("password", "admin"))
+        if st.button("Login", use_container_width=True):
             if username == "admin" and password == "admin":
                 st.session_state.username = username
                 st.session_state.password = password
@@ -312,7 +305,7 @@ if st.session_state.screen == "login":
                 st.session_state.logged_in = True
                 st.rerun()
             else:
-                st.error("Usuario o contraseña incorrectos. Usa admin/admin.")
+                st.error("Incorrect username or password. Use admin/admin.")
         st.markdown("</div>", unsafe_allow_html=True)
 
 elif st.session_state.screen == "index":
@@ -338,36 +331,36 @@ elif st.session_state.screen == "index":
                 try:
                     curriculum_df = load_uploaded_dataframe(uploaded_curriculum)
                     st.session_state.curriculum_df = curriculum_df
-                    st.success(f"Currículo guardado en: {saved_path}")
+                    st.success(f"Curriculum saved to: {saved_path}")
                 except Exception as e:
                     st.session_state.curriculum_df = None
-                    st.error(f"Error leyendo el archivo de currículo: {e}")
+                    st.error(f"Error reading curriculum file: {e}")
             else:
-                st.info(f"Archivo guardado en: {saved_path}")
+                st.info(f"File saved to: {saved_path}")
 
         if st.session_state.curriculum_file_path:
-            st.info(f"Archivo de currículo cargado: {st.session_state.curriculum_file_path}")
+            st.info(f"Loaded curriculum file: {st.session_state.curriculum_file_path}")
         if st.session_state.curriculum_df is not None:
-            st.markdown("### Vista previa del currículo")
+            st.markdown("### Curriculum Preview")
             st.dataframe(st.session_state.curriculum_df.head(10), use_container_width=True)
-            st.markdown("**Columnas del currículo:** " + ", ".join(st.session_state.curriculum_df.columns))
-            st.markdown("### Mapear columnas del currículo")
-            curriculum_fields = ["Objetivos", "Contenidos", "Indicadores", "Actividades"]
+            st.markdown("**Curriculum Columns:** " + ", ".join(st.session_state.curriculum_df.columns))
+            st.markdown("### Map Curriculum Columns")
+            curriculum_fields = ["Objectives", "Contents", "Indicators", "Activities"]
             cols = list(st.session_state.curriculum_df.columns)
             new_mapping = {}
             for field in curriculum_fields:
-                selection = st.selectbox(f"Columna para '{field}'", ["-- Ninguna --"] + cols, index=0, key=f"map_curr_{field}")
-                if selection != "-- Ninguna --":
+                selection = st.selectbox(f"Column for '{field}'", ["-- None --"] + cols, index=0, key=f"map_curr_{field}")
+                if selection != "-- None --":
                     new_mapping[selection] = field
-            if st.button("Aplicar mapeo currículo"):
+            if st.button("Apply Curriculum Mapping"):
                 try:
                     mapped = st.session_state.curriculum_df.rename(columns=new_mapping)
                     st.session_state.curriculum_df = mapped
                     st.session_state.curriculum_column_mapping = new_mapping
-                    st.success("Mapeo aplicado al currículo.")
+                    st.success("Curriculum mapping applied successfully.")
                     st.dataframe(st.session_state.curriculum_df.head(10), use_container_width=True)
                 except Exception as e:
-                    st.error(f"Error aplicando mapeo: {e}")
+                    st.error(f"Error applying mapping: {e}")
 
         st.success("Curriculum configuration will guide Gemma recommendations.")
         st.session_state.curriculum_source = curriculum_source
@@ -375,7 +368,7 @@ elif st.session_state.screen == "index":
         st.session_state.curriculum_subject = subject
         st.session_state.curriculum_instructions = curriculum_instructions
         
-        if st.button("✅ Volver a Teacher Upload", use_container_width=True, key="back_to_upload"):
+        if st.button("✅ Back to Teacher Upload", use_container_width=True, key="back_to_upload"):
             st.session_state.force_curriculum_view = False
             st.rerun()
     else:
@@ -402,36 +395,36 @@ elif st.session_state.screen == "index":
                     try:
                         curriculum_df = load_uploaded_dataframe(uploaded_curriculum)
                         st.session_state.curriculum_df = curriculum_df
-                        st.success(f"Currículo guardado en: {saved_path}")
+                        st.success(f"Curriculum saved to: {saved_path}")
                     except Exception as e:
                         st.session_state.curriculum_df = None
-                        st.error(f"Error leyendo el archivo de currículo: {e}")
+                        st.error(f"Error reading curriculum file: {e}")
                 else:
-                    st.info(f"Archivo guardado en: {saved_path}")
+                    st.info(f"File saved to: {saved_path}")
 
             if st.session_state.curriculum_file_path:
-                st.info(f"Archivo de currículo cargado: {st.session_state.curriculum_file_path}")
+                st.info(f"Loaded curriculum file: {st.session_state.curriculum_file_path}")
             if st.session_state.curriculum_df is not None:
-                st.markdown("### Vista previa del currículo")
+                st.markdown("### Curriculum Preview")
                 st.dataframe(st.session_state.curriculum_df.head(10), use_container_width=True)
-                st.markdown("**Columnas del currículo:** " + ", ".join(st.session_state.curriculum_df.columns))
-                st.markdown("### Mapear columnas del currículo")
-                curriculum_fields = ["Objetivos", "Contenidos", "Indicadores", "Actividades"]
+                st.markdown("**Curriculum Columns:** " + ", ".join(st.session_state.curriculum_df.columns))
+                st.markdown("### Map Curriculum Columns")
+                curriculum_fields = ["Objectives", "Contents", "Indicators", "Activities"]
                 cols = list(st.session_state.curriculum_df.columns)
                 new_mapping = {}
                 for field in curriculum_fields:
-                    selection = st.selectbox(f"Columna para '{field}'", ["-- Ninguna --"] + cols, index=0, key=f"tab2_map_curr_{field}")
-                    if selection != "-- Ninguna --":
+                    selection = st.selectbox(f"Column for '{field}'", ["-- None --"] + cols, index=0, key=f"tab2_map_curr_{field}")
+                    if selection != "-- None --":
                         new_mapping[selection] = field
-                if st.button("Aplicar mapeo currículo", key="tab2_apply_map"):
+                if st.button("Apply Curriculum Mapping", key="tab2_apply_map"):
                     try:
                         mapped = st.session_state.curriculum_df.rename(columns=new_mapping)
                         st.session_state.curriculum_df = mapped
                         st.session_state.curriculum_column_mapping = new_mapping
-                        st.success("Mapeo aplicado al currículo.")
+                        st.success("Curriculum mapping applied successfully.")
                         st.dataframe(st.session_state.curriculum_df.head(10), use_container_width=True)
                     except Exception as e:
-                        st.error(f"Error aplicando mapeo: {e}")
+                        st.error(f"Error applying mapping: {e}")
 
             st.success("Curriculum configuration will guide Gemma recommendations.")
             st.session_state.curriculum_source = curriculum_source
@@ -439,7 +432,7 @@ elif st.session_state.screen == "index":
             st.session_state.curriculum_subject = subject
             st.session_state.curriculum_instructions = curriculum_instructions
 
-        if st.button("Cerrar sesión", key="logout_index", help="Volver al login"): 
+        if st.button("Logout", key="logout_index", help="Return to login"): 
             st.session_state.screen = "login"
             st.session_state.logged_in = False
             st.session_state.username = ""
@@ -461,45 +454,44 @@ elif st.session_state.screen == "index":
                     st.success(f"File uploaded and saved to: {saved_path}")
                     st.dataframe(df.head(10), use_container_width=True)
 
-                    st.markdown("### Mapear columnas del archivo de alumnos")
+                    st.markdown("### Map Student File Columns")
                     cols = list(df.columns)
                     mapping = {}
                     for req in required_columns:
-                        sel = st.selectbox(f"Columna para '{req}'", ["-- Ninguna --"] + cols, index=0, key=f"map_student_{req}")
-                        if sel != "-- Ninguna --":
+                        sel = st.selectbox(f"Column for '{req}'", ["-- None --"] + cols, index=0, key=f"map_student_{req}")
+                        if sel != "-- None --":
                             mapping[sel] = req
 
-                    if st.button("Aplicar mapeo de alumnos"):
+                    if st.button("Apply Student Mapping"):
                         try:
                             mapped_df = df.rename(columns=mapping)
                             missing = validate_file(mapped_df)
                             if missing:
-                                st.error("Faltan columnas requeridas después del mapeo: " + ", ".join(missing))
+                                st.error("Missing required columns after mapping: " + ", ".join(missing))
                             else:
                                 st.session_state.df = mapped_df
                                 st.session_state.student_column_mapping = mapping
-                                st.success("Mapeo aplicado y datos cargados.")
+                                st.success("Mapping applied and data loaded successfully.")
                                 st.dataframe(mapped_df.head(10), use_container_width=True)
                         except Exception as e:
-                            st.error(f"Error aplicando mapeo de alumnos: {e}")
+                            st.error(f"Error applying student mapping: {e}")
                 except Exception as e:
                     st.error(f"Error reading file: {e}")
             else:
                 st.info("No file uploaded yet. The app will use sample student data for the demo.")
 
-            # FIX 2: Checkbox en lugar de botones anidados para no romper Streamlit
-            st.info(f"La recomendación con el modelo seleccionado ({st.session_state.get('selected_model')}) puede tardar varios segundos por cada estudiante.")
+            st.info(f"Recommendation generation with the selected model ({st.session_state.get('selected_model')}) may take several seconds per student.")
             
             curriculum_exists = Path("admin_curriculum_example.csv").exists() or st.session_state.curriculum_df is not None
             can_proceed = True
 
             if not curriculum_exists:
-                st.warning("⚠️ No se encontró un currículo adjunto (admin_curriculum_example.csv).")
-                st.info("Se realizará una evaluación sin currículo, lo que limitará las recomendaciones a buenas prácticas generales.")
-                can_proceed = st.checkbox("Entiendo, deseo continuar sin un currículo personalizado", key="confirm_skip_curr")
+                st.warning("⚠️ No attached curriculum found (admin_curriculum_example.csv).")
+                st.info("An evaluation without a curriculum will be performed, limiting recommendations to general best practices.")
+                can_proceed = st.checkbox("I understand, continue without a personalized curriculum", key="confirm_skip_curr")
                 
                 if not can_proceed:
-                     if st.button("❌ Ir a configurar currículo", use_container_width=True):
+                     if st.button("❌ Go to configure curriculum", use_container_width=True):
                          st.session_state.force_curriculum_view = True
                          st.rerun()
 
@@ -507,20 +499,20 @@ elif st.session_state.screen == "index":
                 if st.button("Analyze gaps with AI", use_container_width=True):
                     missing = validate_file(st.session_state.df)
                     if missing:
-                        st.error("Faltan columnas requeridas antes de analizar: " + ", ".join(missing))
+                        st.error("Missing required columns before analysis: " + ", ".join(missing))
                     else:
                         try:
                             final_df, summary = analyze_students(st.session_state.df)
-                            errors = [r for r in final_df["Gemma_4_Recommendation"] if isinstance(r, str) and r.startswith("Error generando recomendación:")]
+                            errors = [r for r in final_df["Gemma_4_Recommendation"] if isinstance(r, str) and r.startswith("Error generating recommendation:")]
                             if errors:
-                                st.error("Ocurrió un error en la generación de recomendaciones de Ollama. Revisa la disponibilidad del modelo.")
+                                st.error("An error occurred during Ollama recommendation generation. Please check model availability.")
                                 for err in errors[:3]:
                                     st.warning(err)
                             st.session_state.analysis = {"df": final_df, "summary": summary}
                             st.session_state.screen = "dashboard"
                             st.rerun()
                         except Exception as e:
-                            st.error("Error al generar las recomendaciones: " + str(e))
+                            st.error("Error generating recommendations: " + str(e))
 
 elif st.session_state.screen == "dashboard":
     df = st.session_state.analysis["df"]
@@ -528,7 +520,7 @@ elif st.session_state.screen == "dashboard":
 
     st.markdown("<span class='badge'>✨ AI Insights</span>", unsafe_allow_html=True)
     st.markdown("## Teacher Analytics Dashboard")
-    if st.button("Cerrar sesión", key="logout_dashboard", help="Volver al login desde el dashboard"):
+    if st.button("Logout", key="logout_dashboard", help="Return to login from dashboard"):
         st.session_state.screen = "login"
         st.session_state.logged_in = False
         st.session_state.username = ""
