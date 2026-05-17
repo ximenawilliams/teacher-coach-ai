@@ -39,7 +39,7 @@ Teacher Coach AI combines performance data ingestion with a local Artificial Int
 - **User Interface:** Streamlit
 - **Data Processing:** Pandas, OpenPyXL
 - **Local Inference Engine:** Ollama
-- **AI Models:** Gemma Open Models Family (Google)
+- **AI Models:** Gemma 4 Open Models Family (Google)
 
 ---
 
@@ -47,7 +47,7 @@ Teacher Coach AI combines performance data ingestion with a local Artificial Int
 
 The technical core of the application uses a Retrieval-Augmented Generation (RAG) approach adapted for local environments. Before performing inference, the system intercepts the evaluated topic, extracts the corresponding objectives and contents from the loaded institutional curriculum, and builds an enriched prompt.
 
-To ensure stability on standard school computers without dedicated GPUs, the backend is configured by default to use **`gemma2:2b`**, requiring less than 3 GB of RAM/VRAM for smooth inference execution.
+To ensure stability on standard school computers without dedicated GPUs, the backend is configured by default to use **`gemma4:e2b`**, requiring less than 3 GB of RAM/VRAM for smooth inference execution.
 
 ### RAG Pipeline Implementation Example
 
@@ -67,7 +67,7 @@ Generate a brief pedagogical recommendation using local environmental resources.
 """
 
 response = ollama.chat(
-    model="gemma2:2b", # Lightweight model optimized for low-cost hardware
+    model="gemma4:e2b", # Lightweight edge model optimized for low-cost hardware
     messages=[
         {"role": "system", "content": "You are an educational assistant. You respond briefly, directly, and in a structured format."},
         {"role": "user", "content": prompt}
@@ -134,11 +134,11 @@ chmod +x start_teacher_coach.sh
 ./start_teacher_coach.sh
 ```
 
-*The script will automatically ask for your preferred setup language (English/Spanish), install all Python dependencies, verify/pull the required `gemma2:2b` local model, and launch the application directly in your web browser.*
+*The script will automatically ask for your preferred setup language (English/Spanish), install all Python dependencies, verify/pull the required `gemma4:e2b` local model, and launch the application directly in your web browser.*
 
 ---
 
 ## 👨‍💻 Credits & Mentorship
 
-- **Ximena Williams:** Software Architecture, Lead Developer & Project Creator.
+- **Ximena Williams:** Software Architect, Lead Developer & Project Creator.
 - **David Guevara:** Lead Software Architect, Core Developer & AI Mentor.
