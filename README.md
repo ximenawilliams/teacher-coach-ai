@@ -29,6 +29,7 @@ Teacher Coach AI combines performance data ingestion with a local Artificial Int
 - **Smart RAG-Lite Recommendations:** Dynamic injection of the curriculum into the model's prompt to ensure pedagogical alignment and prevent AI hallucinations.
 - **Teacher Dashboard:** Interactive visual panel with bar charts to identify weak subject areas at a group level.
 - **Offline & Low-Cost Design:** Optimized to run 100% without internet connection and on standard, low-spec hardware.
+- **1-Click Installation:** Automated setup scripts with bilingual support (English/Spanish) for non-technical users.
 
 ---
 
@@ -68,7 +69,7 @@ Generate a brief pedagogical recommendation using local environmental resources.
 response = ollama.chat(
     model="gemma2:2b", # Lightweight model optimized for low-cost hardware
     messages=[
-        {"role": "system", "content": "You are an official educational assistant based on the national curriculum."},
+        {"role": "system", "content": "You are an educational assistant. You respond briefly, directly, and in a structured format."},
         {"role": "user", "content": prompt}
     ]
 )
@@ -93,6 +94,8 @@ recommendation = response.get("message", {}).get("content", "").strip()
 ```text
 teacher-coach-ai/
 │
+├── start_teacher_coach.bat      # 1-Click Windows Setup & Run Script
+├── start_teacher_coach.sh       # 1-Click Linux/Mac Setup & Run Script
 ├── app.py                       # Main Streamlit app (UI & RAG Logic)
 ├── requirements.txt             # Project dependencies
 ├── README.md                    # Main documentation
@@ -110,31 +113,32 @@ teacher-coach-ai/
 
 ---
 
-## 🚀 Requirements & Quick Start
+## 🚀 Requirements & Quick Start (1-Click Install)
 
-Ensure you have Python and Ollama installed locally before starting the application.
+This project is designed for users without technical backgrounds (like rural educators). You do not need to install dependencies or pull models manually.
 
-### 1. Pull the optimized model
-Open your terminal or command prompt and run the following command to download the lightweight version of Gemma:
+### Prerequisites
+1. **Python 3.9+** must be installed on your system.
+2. **Ollama** must be installed and running in the background. Download it from [ollama.com](https://ollama.com).
+
+### Setup & Run
+Download or clone this repository, open the folder, and run the automated script for your operating system:
+
+**For Windows:**
+Double-click the `start_teacher_coach.bat` file.
+
+**For Linux / macOS:**
+Open your terminal, navigate to the folder, and run:
 ```bash
-ollama pull gemma2:2b
+chmod +x start_teacher_coach.sh
+./start_teacher_coach.sh
 ```
 
-### 2. Install Python dependencies
-Install the necessary libraries specified in the requirements file:
-```bash
-pip install -r requirements.txt
-```
-
-### 3. Run the application locally
-Start the local Streamlit server to open the interface in your web browser:
-```bash
-streamlit run app.py
-```
+*The script will automatically ask for your preferred setup language (English/Spanish), install all Python dependencies, verify/pull the required `gemma2:2b` local model, and launch the application directly in your web browser.*
 
 ---
 
 ## 👨‍💻 Credits & Mentorship
 
-- **Ximena Williams:** Lead Developer & Project Creator.
-- **David Guevara:** Software Architecture Advisor & AI Mentor.
+- **Ximena Williams:** Software Architecture, Lead Developer & Project Creator.
+- **David Guevara:** Lead Software Architect, Core Developer & AI Mentor.
