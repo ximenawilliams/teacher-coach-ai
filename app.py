@@ -22,11 +22,11 @@ st.set_page_config(page_title="Teacher Coach AI", page_icon="📚", layout="wide
 # Gemma Model Configuration (Official V4)
 # ==========================================
 OLLAMA_MODELS = [
-    "gemma2:2b",
     "gemma4:e2b",  # Lightweight Edge model (Default)
     "gemma4:e4b",  # Medium Edge model
     "gemma4:26b",  # Heavy reasoning model
     "gemma4:31b",  # Advanced reasoning model
+    "gemma4",
 ]
 
 selected_model = st.sidebar.selectbox(
@@ -97,24 +97,54 @@ def validate_file(df):
 
 # Executed safely on the Main Thread
 def build_curriculum_description():
+
+    # 1. Intentar usar curriculum subido por docente/admin
     curriculum_df = st.session_state.get("curriculum_df")
 
+    # 2. Si no existe, cargar curriculum default
+    if curriculum_df is None or curriculum_df.empty:
+        default_path = Path("data/admin_curriculum_example.csv")
+
+        if default_path.exists():
+            try:
+                curriculum_df = pd.read_csv(default_path)
+            except Exception:
+                curriculum_df = None
+
+    # 3. Si aun no existe nada
     if curriculum_df is None or curriculum_df.empty:
         return "Use general teaching recommendations aligned with the uploaded student data."
 
+    # 4. Construir descripción curriculum
     text = "Curriculum guidelines found:\n"
-    target_columns = ["Subject", "Topic", "Objectives", "Contents", "Indicators", "Activities"]
+
+    target_columns = [
+        "Subject",
+        "Topic",
+        "Objectives",
+        "Contents",
+        "Indicators",
+        "Activities"
+    ]
+
     available_cols = [c for c in target_columns if c in curriculum_df.columns]
-    
+
     if not available_cols:
         available_cols = list(curriculum_df.columns[:4])
 
-    for index, row in curriculum_df.head(5).fillna("").iterrows():
-        parts = [f"{col}: {row[col]}" for col in available_cols if str(row[col]).strip()]
+    for index, row in curriculum_df.head(3).fillna("").iterrows():
+
+        parts = [
+            f"{col}: {row[col]}"
+            for col in available_cols
+            if str(row[col]).strip()
+        ]
+
         if parts:
             text += f"{index + 1}. " + "; ".join(parts) + "\n"
-            
+
     text += "\nUse this curriculum to validate learning gaps and propose aligned activities."
+
     return text
 
 # Thread-safe function: All context is explicitly passed as arguments
@@ -148,9 +178,24 @@ Take into account the following school curriculum when generating the recommenda
 
 {curriculum_description}
 
+Educational Context:
+- Curriculum Source: {st.session_state.get("curriculum_source")}
+- Grade Level: {st.session_state.get("curriculum_grade")}
+- Subjects: {st.session_state.get("curriculum_subject")}
+- Teacher Guidance: {st.session_state.get("curriculum_instructions")}
+
 Validate the student's learning gap based on this curriculum.
-Suggest activities aligned with objectives, contents, and indicators.
-If the gap cannot be directly covered by the curriculum, suggest complementary activities that respect its objectives.
+
+Suggest activities aligned with:
+- objectives
+- contents
+- indicators
+- classroom activities
+
+The recommendation MUST explicitly align with the uploaded curriculum.
+
+If the gap cannot be directly covered by the curriculum,
+suggest complementary activities that respect its objectives.
 """
     else:
         prompt += """
@@ -167,6 +212,7 @@ Include:
 2. Reinforcement Activity
 3. Brief guide for the teacher
 """
+
 
     try:
         response = ollama.chat(
@@ -471,7 +517,7 @@ elif st.session_state.screen == "index":
 
             st.info(f"Recommendation generation with the selected model ({st.session_state.get('selected_model')}) may take several seconds per student.")
             
-            curriculum_exists = Path("admin_curriculum_example.csv").exists() or st.session_state.curriculum_df is not None
+            curriculum_exists = Path("data/admin_curriculum_example.csv").exists() or st.session_state.curriculum_df is not None
             can_proceed = True
 
             if not curriculum_exists:

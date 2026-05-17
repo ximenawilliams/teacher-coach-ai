@@ -1,21 +1,21 @@
-Student,Grade,Subject,Topic,Competency,Score,Attendance
-Ana Rodriguez,5,Math,Fractions,Solves fraction problems,60,92
-Luis Martinez,5,Math,Fractions,Solves fraction problems,55,88
-Marta Gomez,5,Math,Fractions,Solves fraction problems,72,95
-Pedro Castillo,5,Math,Fractions,Solves fraction problems,58,85
-Sofia Perez,5,Math,Fractions,Solves fraction problems,80,97
-Carlos Rivera,5,Reading,Main Idea,Identifies the main idea in a text,65,90
-Elena Torres,5,Reading,Main Idea,Identifies the main idea in a text,70,93
-Jose Morales,5,Reading,Main Idea,Identifies the main idea in a text,62,87
-Lucia Herrera,5,Reading,Main Idea,Identifies the main idea in a text,78,95
-Miguel Diaz,5,Reading,Main Idea,Identifies the main idea in a text,59,84
-Daniel Cruz,5,Science,Water Cycle,Explains evaporation and condensation,68,91
-Camila Santos,5,Science,Water Cycle,Explains evaporation and condensation,74,96
-Andres Vega,5,Science,Water Cycle,Explains evaporation and condensation,63,88
-Valeria Lopez,5,Science,Water Cycle,Explains evaporation and condensation,82,98
-Fernando Ruiz,5,Science,Water Cycle,Explains evaporation and condensation,57,80
-Paula Navarro,5,Math,Multiplication,Solves multiplication exercises,66,92
-Ricardo Flores,5,Math,Multiplication,Solves multiplication exercises,61,89
-Natalia Jimenez,5,Math,Multiplication,Solves multiplication exercises,85,97
-Gabriel Mendoza,5,Math,Multiplication,Solves multiplication exercises,54,82
-Isabella Castro,5,Math,Multiplication,Solves multiplication exercises,73,94
+Student,Grade,Subject,Topic,Competency,Score,Attendance,Objective,Resources,Teaching_Method,Evaluation_Type
+Andrea Molina,5,Math,Decimals,Understands decimal operations,52,78,Improve decimal understanding,Board and notebook,Guided practice,Short quiz
+Kevin Ramirez,5,Math,Decimals,Understands decimal operations,69,90,Improve decimal understanding,Visual cards,Hands-on learning,Worksheet
+Maria Castillo,5,Math,Decimals,Understands decimal operations,81,96,Improve decimal understanding,Notebook and manipulatives,Collaborative learning,Short quiz
+Javier Ortega,5,Math,Decimals,Understands decimal operations,57,84,Improve decimal understanding,Board and local objects,Step-by-step teaching,Oral assessment
+Laura Medina,5,Math,Decimals,Understands decimal operations,74,93,Improve decimal understanding,Fraction charts,Guided exercises,Worksheet
+Samuel Perez,5,Reading,Inference,Infers meaning from text,61,85,Develop reading inference skills,Reading cards and notebook,Group reading,Oral questions
+Daniela Rios,5,Reading,Inference,Infers meaning from text,79,95,Develop reading inference skills,Printed stories,Collaborative reading,Short essay
+Victor Herrera,5,Reading,Inference,Infers meaning from text,55,80,Develop reading inference skills,Board and markers,Teacher-guided reading,Oral questions
+Paola Sanchez,5,Reading,Inference,Infers meaning from text,68,89,Develop reading inference skills,Short stories and notebook,Pair activities,Worksheet
+Alejandro Cruz,5,Reading,Inference,Infers meaning from text,84,97,Develop reading inference skills,Printed materials,Independent reading,Short essay
+Sara Lopez,5,Science,Ecosystems,Identifies ecosystem components,58,83,Understand ecosystems and habitats,School garden and posters,Observation activity,Worksheet
+Diego Morales,5,Science,Ecosystems,Identifies ecosystem components,73,94,Understand ecosystems and habitats,Science notebook,Interactive discussion,Short quiz
+Valentina Torres,5,Science,Ecosystems,Identifies ecosystem components,66,88,Understand ecosystems and habitats,Local plants and charts,Hands-on exploration,Worksheet
+Cristian Vega,5,Science,Ecosystems,Identifies ecosystem components,54,79,Understand ecosystems and habitats,Board and visual aids,Guided instruction,Oral presentation
+Fernanda Ruiz,5,Science,Ecosystems,Identifies ecosystem components,87,98,Understand ecosystems and habitats,School garden,Project-based learning,Presentation
+Julian Castro,5,Math,Geometry,Identifies geometric figures,63,86,Recognize geometric shapes,Rulers and paper shapes,Visual teaching,Short quiz
+Monica Diaz,5,Math,Geometry,Identifies geometric figures,71,92,Recognize geometric shapes,Classroom objects,Collaborative work,Worksheet
+Sebastian Flores,5,Math,Geometry,Identifies geometric figures,59,81,Recognize geometric shapes,Shape templates,Hands-on practice,Oral assessment
+Gabriela Mendoza,5,Math,Geometry,Identifies geometric figures,82,96,Recognize geometric shapes,Notebook and ruler,Independent exercises,Short quiz
+Emilio Navarro,5,Math,Geometry,Identifies geometric figures,56,80,Recognize geometric shapes,Board and local materials,Teacher-guided practice,Worksheet

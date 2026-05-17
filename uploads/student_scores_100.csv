@@ -1,0 +1,101 @@
+Student,Grade,Subject,Topic,Competency,Score,Attendance,Objective,Resources,Teaching_Method,Evaluation_Type
+Noah,5,English,Grammar,Communication,89,71,Improve classroom performance,"Notebook, board, classroom materials",Hands-on activities,Homework
+Jermaine,6,Science,Plants,Scientific Thinking,44,79,Improve classroom performance,"Notebook, board, classroom materials",Visual learning,Quiz
+Michael,6,Math,Algebra,Problem Solving,40,94,Improve classroom performance,"Notebook, board, classroom materials",Hands-on activities,Homework
+Amanda,6,Science,Ecosystems,Scientific Thinking,54,91,Improve classroom performance,"Notebook, board, classroom materials",Guided practice,Quiz
+Billy,6,Reading,Vocabulary,Comprehension,57,73,Improve classroom performance,"Notebook, board, classroom materials",Hands-on activities,Quiz
+Jimmy,5,Math,Geometry,Problem Solving,41,68,Improve classroom performance,"Notebook, board, classroom materials",Visual learning,Homework
+Johnny,5,Reading,Summarizing,Comprehension,57,61,Improve classroom performance,"Notebook, board, classroom materials",Visual learning,Quiz
+Charles,6,English,Writing,Communication,70,84,Improve classroom performance,"Notebook, board, classroom materials",Collaborative learning,Quiz
+Mallory,4,Math,Decimals,Problem Solving,95,75,Improve classroom performance,"Notebook, board, classroom materials",Guided practice,Project
+Stephanie,6,Science,Water Cycle,Scientific Thinking,51,77,Improve classroom performance,"Notebook, board, classroom materials",Visual learning,Oral presentation
+Ronald,5,Math,Decimals,Problem Solving,97,65,Improve classroom performance,"Notebook, board, classroom materials",Collaborative learning,Homework
+Heather,4,Reading,Main Idea,Comprehension,57,76,Improve classroom performance,"Notebook, board, classroom materials",Hands-on activities,Quiz
+Nathan,6,Reading,Main Idea,Comprehension,82,72,Improve classroom performance,"Notebook, board, classroom materials",Guided practice,Quiz
+Kelly,4,Math,Fractions,Problem Solving,59,75,Improve classroom performance,"Notebook, board, classroom materials",Visual learning,Project
+Travis,4,English,Vocabulary,Communication,50,76,Improve classroom performance,"Notebook, board, classroom materials",Guided practice,Quiz
+Jose,6,Reading,Main Idea,Comprehension,98,95,Improve classroom performance,"Notebook, board, classroom materials",Collaborative learning,Oral presentation
+Cameron,6,Science,Water Cycle,Scientific Thinking,47,64,Improve classroom performance,"Notebook, board, classroom materials",Collaborative learning,Project
+Paul,4,Math,Algebra,Problem Solving,81,81,Improve classroom performance,"Notebook, board, classroom materials",Visual learning,Quiz
+William,4,English,Writing,Communication,61,82,Improve classroom performance,"Notebook, board, classroom materials",Guided practice,Quiz
+Samantha,5,English,Grammar,Communication,63,85,Improve classroom performance,"Notebook, board, classroom materials",Hands-on activities,Quiz
+David,4,Reading,Inference,Comprehension,56,94,Improve classroom performance,"Notebook, board, classroom materials",Visual learning,Quiz
+Kerry,4,Reading,Vocabulary,Comprehension,77,64,Improve classroom performance,"Notebook, board, classroom materials",Collaborative learning,Oral presentation
+Dustin,4,Math,Percentages,Problem Solving,46,93,Improve classroom performance,"Notebook, board, classroom materials",Hands-on activities,Homework
+Meghan,4,Reading,Comprehension,Comprehension,47,84,Improve classroom performance,"Notebook, board, classroom materials",Collaborative learning,Quiz
+Ricky,4,Science,Ecosystems,Scientific Thinking,69,73,Improve classroom performance,"Notebook, board, classroom materials",Guided practice,Homework
+Robert,5,Reading,Main Idea,Comprehension,77,76,Improve classroom performance,"Notebook, board, classroom materials",Collaborative learning,Oral presentation
+Michael,6,Science,Water Cycle,Scientific Thinking,72,70,Improve classroom performance,"Notebook, board, classroom materials",Guided practice,Project
+Ashley,5,Math,Algebra,Problem Solving,56,94,Improve classroom performance,"Notebook, board, classroom materials",Hands-on activities,Quiz
+Joshua,5,Math,Algebra,Problem Solving,72,88,Improve classroom performance,"Notebook, board, classroom materials",Collaborative learning,Quiz
+Jennifer,4,Science,Energy,Scientific Thinking,77,78,Improve classroom performance,"Notebook, board, classroom materials",Guided practice,Oral presentation
+Erica,6,Science,Water Cycle,Scientific Thinking,46,91,Improve classroom performance,"Notebook, board, classroom materials",Visual learning,Quiz
+Michael,5,Math,Decimals,Problem Solving,61,94,Improve classroom performance,"Notebook, board, classroom materials",Hands-on activities,Project
+Mark,6,English,Grammar,Communication,79,89,Improve classroom performance,"Notebook, board, classroom materials",Hands-on activities,Project
+James,6,Math,Percentages,Problem Solving,65,79,Improve classroom performance,"Notebook, board, classroom materials",Hands-on activities,Quiz
+Howard,6,English,Vocabulary,Communication,80,88,Improve classroom performance,"Notebook, board, classroom materials",Collaborative learning,Oral presentation
+Christina,6,Math,Percentages,Problem Solving,44,68,Improve classroom performance,"Notebook, board, classroom materials",Guided practice,Quiz
+Jennifer,6,English,Conversation,Communication,66,95,Improve classroom performance,"Notebook, board, classroom materials",Collaborative learning,Project
+Daniel,5,Science,Plants,Scientific Thinking,66,62,Improve classroom performance,"Notebook, board, classroom materials",Guided practice,Oral presentation
+Joshua,4,English,Reading,Communication,59,61,Improve classroom performance,"Notebook, board, classroom materials",Guided practice,Oral presentation
+Karen,4,Math,Geometry,Problem Solving,81,88,Improve classroom performance,"Notebook, board, classroom materials",Visual learning,Homework
+Jessica,4,English,Grammar,Communication,94,75,Improve classroom performance,"Notebook, board, classroom materials",Hands-on activities,Oral presentation
+Joanna,4,Reading,Inference,Comprehension,41,98,Improve classroom performance,"Notebook, board, classroom materials",Visual learning,Homework
+Kim,6,Math,Percentages,Problem Solving,74,87,Improve classroom performance,"Notebook, board, classroom materials",Collaborative learning,Oral presentation
+Laura,4,English,Vocabulary,Communication,56,84,Improve classroom performance,"Notebook, board, classroom materials",Guided practice,Homework
+Alison,6,Reading,Main Idea,Comprehension,84,74,Improve classroom performance,"Notebook, board, classroom materials",Hands-on activities,Oral presentation
+Christina,5,Math,Algebra,Problem Solving,85,64,Improve classroom performance,"Notebook, board, classroom materials",Visual learning,Oral presentation
+Daniel,5,Science,Plants,Scientific Thinking,96,71,Improve classroom performance,"Notebook, board, classroom materials",Guided practice,Oral presentation
+Katherine,5,Science,Ecosystems,Scientific Thinking,57,85,Improve classroom performance,"Notebook, board, classroom materials",Guided practice,Homework
+Travis,4,Science,Plants,Scientific Thinking,69,89,Improve classroom performance,"Notebook, board, classroom materials",Hands-on activities,Homework
+Darryl,5,English,Conversation,Communication,58,99,Improve classroom performance,"Notebook, board, classroom materials",Hands-on activities,Project
+Mary,6,Reading,Comprehension,Comprehension,55,93,Improve classroom performance,"Notebook, board, classroom materials",Collaborative learning,Quiz
+Brian,4,English,Writing,Communication,68,88,Improve classroom performance,"Notebook, board, classroom materials",Hands-on activities,Quiz
+Evelyn,6,Math,Fractions,Problem Solving,69,73,Improve classroom performance,"Notebook, board, classroom materials",Hands-on activities,Oral presentation
+Antonio,5,Science,Energy,Scientific Thinking,63,94,Improve classroom performance,"Notebook, board, classroom materials",Hands-on activities,Quiz
+Eddie,5,English,Reading,Communication,63,85,Improve classroom performance,"Notebook, board, classroom materials",Hands-on activities,Oral presentation
+Donald,4,Science,Animals,Scientific Thinking,52,60,Improve classroom performance,"Notebook, board, classroom materials",Visual learning,Homework
+Pamela,6,Reading,Comprehension,Comprehension,96,87,Improve classroom performance,"Notebook, board, classroom materials",Hands-on activities,Homework
+Scott,5,Reading,Vocabulary,Comprehension,90,87,Improve classroom performance,"Notebook, board, classroom materials",Visual learning,Homework
+Paul,4,Reading,Main Idea,Comprehension,76,62,Improve classroom performance,"Notebook, board, classroom materials",Visual learning,Homework
+Kimberly,5,Reading,Summarizing,Comprehension,83,68,Improve classroom performance,"Notebook, board, classroom materials",Collaborative learning,Project
+Larry,5,Reading,Main Idea,Comprehension,93,82,Improve classroom performance,"Notebook, board, classroom materials",Guided practice,Quiz
+Dylan,5,Math,Decimals,Problem Solving,46,84,Improve classroom performance,"Notebook, board, classroom materials",Hands-on activities,Project
+Bobby,4,Science,Ecosystems,Scientific Thinking,41,74,Improve classroom performance,"Notebook, board, classroom materials",Guided practice,Oral presentation
+Chris,4,English,Vocabulary,Communication,75,92,Improve classroom performance,"Notebook, board, classroom materials",Visual learning,Project
+Ann,5,Math,Percentages,Problem Solving,75,90,Improve classroom performance,"Notebook, board, classroom materials",Guided practice,Project
+Robert,6,Reading,Vocabulary,Comprehension,73,80,Improve classroom performance,"Notebook, board, classroom materials",Guided practice,Oral presentation
+Tracy,4,Science,Water Cycle,Scientific Thinking,40,84,Improve classroom performance,"Notebook, board, classroom materials",Hands-on activities,Oral presentation
+Megan,5,Science,Water Cycle,Scientific Thinking,60,95,Improve classroom performance,"Notebook, board, classroom materials",Guided practice,Project
+Deborah,6,English,Writing,Communication,71,79,Improve classroom performance,"Notebook, board, classroom materials",Collaborative learning,Homework
+April,5,Science,Animals,Scientific Thinking,76,65,Improve classroom performance,"Notebook, board, classroom materials",Collaborative learning,Homework
+Alexander,6,Science,Animals,Scientific Thinking,98,80,Improve classroom performance,"Notebook, board, classroom materials",Collaborative learning,Project
+Brian,6,Reading,Comprehension,Comprehension,51,90,Improve classroom performance,"Notebook, board, classroom materials",Hands-on activities,Homework
+Heather,4,English,Writing,Communication,53,100,Improve classroom performance,"Notebook, board, classroom materials",Collaborative learning,Quiz
+Lindsey,4,Science,Water Cycle,Scientific Thinking,57,94,Improve classroom performance,"Notebook, board, classroom materials",Guided practice,Project
+Tonya,5,Science,Energy,Scientific Thinking,57,79,Improve classroom performance,"Notebook, board, classroom materials",Hands-on activities,Quiz
+Eric,6,English,Grammar,Communication,87,86,Improve classroom performance,"Notebook, board, classroom materials",Visual learning,Oral presentation
+Jamie,5,English,Grammar,Communication,67,72,Improve classroom performance,"Notebook, board, classroom materials",Guided practice,Project
+Cristian,6,Math,Fractions,Problem Solving,49,64,Improve classroom performance,"Notebook, board, classroom materials",Hands-on activities,Homework
+Alyssa,6,English,Vocabulary,Communication,64,88,Improve classroom performance,"Notebook, board, classroom materials",Guided practice,Homework
+Connie,4,English,Reading,Communication,80,64,Improve classroom performance,"Notebook, board, classroom materials",Visual learning,Quiz
+Ryan,6,Science,Plants,Scientific Thinking,75,66,Improve classroom performance,"Notebook, board, classroom materials",Collaborative learning,Quiz
+Eugene,4,Science,Energy,Scientific Thinking,61,69,Improve classroom performance,"Notebook, board, classroom materials",Collaborative learning,Homework
+Evan,6,Reading,Summarizing,Comprehension,52,87,Improve classroom performance,"Notebook, board, classroom materials",Guided practice,Quiz
+Timothy,4,Reading,Main Idea,Comprehension,61,84,Improve classroom performance,"Notebook, board, classroom materials",Visual learning,Homework
+Justin,6,Reading,Vocabulary,Comprehension,94,70,Improve classroom performance,"Notebook, board, classroom materials",Visual learning,Quiz
+Mary,6,Math,Geometry,Problem Solving,45,67,Improve classroom performance,"Notebook, board, classroom materials",Visual learning,Oral presentation
+Andres,4,Science,Plants,Scientific Thinking,75,64,Improve classroom performance,"Notebook, board, classroom materials",Guided practice,Quiz
+Nathaniel,5,English,Vocabulary,Communication,83,82,Improve classroom performance,"Notebook, board, classroom materials",Hands-on activities,Oral presentation
+Scott,4,English,Grammar,Communication,59,90,Improve classroom performance,"Notebook, board, classroom materials",Hands-on activities,Homework
+Katherine,5,Math,Algebra,Problem Solving,82,96,Improve classroom performance,"Notebook, board, classroom materials",Collaborative learning,Project
+Robert,4,English,Reading,Communication,61,68,Improve classroom performance,"Notebook, board, classroom materials",Guided practice,Project
+Debra,6,Science,Animals,Scientific Thinking,49,78,Improve classroom performance,"Notebook, board, classroom materials",Hands-on activities,Project
+Eric,6,Science,Water Cycle,Scientific Thinking,84,62,Improve classroom performance,"Notebook, board, classroom materials",Hands-on activities,Oral presentation
+Kelly,4,Reading,Main Idea,Comprehension,69,94,Improve classroom performance,"Notebook, board, classroom materials",Hands-on activities,Oral presentation
+Anthony,6,English,Grammar,Communication,54,73,Improve classroom performance,"Notebook, board, classroom materials",Collaborative learning,Oral presentation
+Danielle,5,English,Grammar,Communication,41,61,Improve classroom performance,"Notebook, board, classroom materials",Collaborative learning,Homework
+Wayne,6,Science,Plants,Scientific Thinking,53,69,Improve classroom performance,"Notebook, board, classroom materials",Visual learning,Homework
+Ryan,5,Math,Geometry,Problem Solving,45,83,Improve classroom performance,"Notebook, board, classroom materials",Guided practice,Project
+Derrick,6,English,Conversation,Communication,58,79,Improve classroom performance,"Notebook, board, classroom materials",Collaborative learning,Homework
+Sara,5,Reading,Summarizing,Comprehension,92,73,Improve classroom performance,"Notebook, board, classroom materials",Visual learning,Project
