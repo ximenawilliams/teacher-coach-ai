@@ -22,6 +22,7 @@ st.set_page_config(page_title="Teacher Coach AI", page_icon="📚", layout="wide
 # Gemma Model Configuration (Official V4)
 # ==========================================
 OLLAMA_MODELS = [
+    "gemma2:2b",
     "gemma4:e2b",  # Lightweight Edge model (Default)
     "gemma4:e4b",  # Medium Edge model
     "gemma4:26b",  # Heavy reasoning model
