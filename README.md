@@ -137,4 +137,4 @@ streamlit run app.py
 ## 👨‍💻 Credits & Mentorship
 
 - **Ximena Williams:** Lead Developer & Project Creator.
-- **David:** Software Architecture Advisor & AI Mentor.
+- **David Guevara:** Software Architecture Advisor & AI Mentor.
