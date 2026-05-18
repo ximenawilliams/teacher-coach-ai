@@ -30,7 +30,7 @@ I18N = {
         "lbl_curr_source": "Curriculum source",
         "lbl_grade": "Grade level",
         "lbl_subject": "Subject",
-        "lbl_browse_curr": "Browse curriculum file Framework (Excel/CSV/PDF/Docx)",
+        "lbl_browse_curr": "Browse curriculum framework file (Excel/CSV/PDF/Docx)",
         "lbl_align_inst": "Curriculum alignment instructions",
         "curr_saved": "Curriculum saved successfully.",
         "curr_err": "Error reading curriculum file:",
@@ -86,7 +86,10 @@ I18N = {
         "chat_welcome": "Hello! I am your local pedagogical coach. How can I help you design classroom strategies or tailored reinforcement exercises today?",
         "chat_placeholder": "Ask your local educational assistant...",
         "chat_badge": "💬 AI Mentorship Chat",
-        "lbl_no_models_warn": "⚠️ No local Gemma models detected. Showing submission targets."
+        "lbl_no_models_warn": "⚠️ No local Gemma models detected. Showing submission targets.",
+        "lbl_gap_out": "Learning Gap",
+        "lbl_act_out": "Reinforcement Activity",
+        "lbl_guide_out": "Teacher Guide"
     },
     "Español": {
         "title": "📚 Teacher Coach AI",
@@ -135,7 +138,7 @@ I18N = {
         "student_map_success": "Mapeo aplicado y datos cargados exitosamente.",
         "student_map_err": "Error al aplicar el mapeo de estudiantes:",
         "no_file_info": "Ningún archivo cargado aún. La aplicación usará datos de muestra para la demostración.",
-        "model_time_info": "La generación de recomendaciones con el modelo seleccionado puede tardar varios segundos por estudiante.",
+        "model_time_info": "La generación de recomendaciones con el modelo seleccionado puede demorar varios segundos por estudiante.",
         "no_curr_warn": "⚠️ No se encontró un currículo adjunto (admin_curriculum_example.csv).",
         "no_curr_info": "Se realizará una evaluación sin currículo base, limitando las recomendaciones a buenas prácticas generales.",
         "chk_understand": "Entiendo, continuar sin un currículo personalizado",
@@ -165,7 +168,10 @@ I18N = {
         "chat_welcome": "¡Hola! Soy tu asesor pedagógico local. ¿Cómo te puedo ayudar a diseñar estrategias didácticas o ejercicios de reforzamiento hoy?",
         "chat_placeholder": "Pregúntale a tu asistente educativo local...",
         "chat_badge": "💬 Chat de Mentoría de IA",
-        "lbl_no_models_warn": "⚠️ No se detectaron modelos Gemma locales. Mostrando objetivos de entrega."
+        "lbl_no_models_warn": "⚠️ No se detectaron modelos Gemma locales. Mostrando objetivos de entrega.",
+        "lbl_gap_out": "Brecha de Aprendizaje",
+        "lbl_act_out": "Actividad de Refuerzo",
+        "lbl_guide_out": "Guía del Docente"
     },
     "Português": {
         "title": "📚 Teacher Coach AI",
@@ -182,7 +188,7 @@ I18N = {
         "err_login": "Usuário ou senha incorretos. Use admin/admin.",
         "setup_badge": "🤖 Configuração de Análise de IA",
         "tab_teacher": "Upload do Professor",
-        "tab_admin": "Currículo Administrator",
+        "tab_admin": "Currículo Administrador",
         "admin_title": "## Configuração do Currículo Base",
         "admin_desc": "Faça o upload dos conteúdos curriculares oficiais ou plano de aulas base. Este se torna o modelo educacional mínimo que o Gemma deve seguir.",
         "lbl_curr_source": "Fonte do currículo",
@@ -197,8 +203,8 @@ I18N = {
         "curr_cols": "**Colunas do Currículo:** ",
         "map_curr_title": "### Mapear Colunas do Currículo",
         "lbl_col_for": "Coluna para",
-        "map_success": "Mapeamento de currículo aplicado com sucesso.",
-        "map_err": "Erro ao aplicar o mappamento:",
+        "map_success": "Mapeamento curricular foi implementado com sucesso.",
+        "map_err": "Erro ao aplicar o mapeamento:",
         "curr_config_alert": "A configuração do currículo guiará as recomendações do Gemma.",
         "btn_back_upload": "✅ Voltar ao Upload do Professor",
         "upload_title": "## Carregar Dados de Desempenho dos Alunos",
@@ -208,7 +214,7 @@ I18N = {
         "lbl_teacher_inst": "Instruções adicionais do professor para o Gemma",
         "val_teacher_inst": "Concentre-se em alunos com baixa frequência e notas baixas. Recomende atividades simples que não exijam internet ou materiais caros.",
         "student_uploaded_success": "Arquivo de dados dos alunos carregado com sucesso.",
-        "map_student_title": "### Mapear Colunas do Archivo de Alunos",
+        "map_student_title": "### Mapear Colunas do Arquivo de Alunos",
         "btn_apply_student_map": "Aplicar Mapeamento de Alunos",
         "missing_cols_err": "Faltam colunas obrigatórias após o mapeamento: ",
         "student_map_success": "Mapeamento aplicado e dados carregados com sucesso.",
@@ -233,25 +239,28 @@ I18N = {
         "rec_per_student_title": "## Recomendações por Aluno",
         "card_ai_rec": "<h3>🤖 Recomendações de IA</h3><div class='recommendation'>Use exemplos visuais e objetos do ambiente para temas fracos.</div><div class='recommendation'>Crie pequenos grupos de apoio para alunos com lacunas semelhantes.</div><div class='recommendation'>Aplique avaliações curtas semanais para medir o progresso.</div>",
         "card_weekly": "<h3>📅 Plano Semanal</h3><div class='recommendation'><b>Segunda-feira:</b> Revisão guiada de temas fracos.</div><div class='recommendation'><b>Quarta-feira:</b> Prática em pequenos grupos.</div><div class='recommendation'><b>Sexta-feira:</b> Mini avaliação e feedback.</div>",
-        "card_responsible": "<h3>🧭 IA Responsable</h3><div class='recommendation'>As recomendações estão alinhadas com as diretrizes curriculares.</div><div class='recommendation'>O sistema evita rotular os alunos negativamente.</div><div class='recommendation'>O professor mantém o controle das decisões.</div>",
+        "card_responsible": "<h3>🧭 IA Responsável</h3><div class='recommendation'>As recomendações estão alinhadas com as diretrizes curriculares.</div><div class='recommendation'>O sistema evita rotular os alunos negativamente.</div><div class='recommendation'>O professor mantém o controle das decisões.</div>",
         "btn_back_index": "Voltar ao Início",
         "prompt_lang": "Portuguese",
         "none_select": "-- Nenhuma --",
         "lbl_applied": "Aplicado com sucesso",
-        "nav_heading": "🧭 Navigation",
+        "nav_heading": "🧭 Navegação",
         "nav_diagnostics": "📊 Diagnóstico de Desempenho",
         "nav_chat": "💬 Tutor Pedagógico Interativo",
         "chat_welcome": "Olá! Sou o seu tutor pedagógico local. Como posso ajudar você a planejar estratégias didáticas ou exercícios sob medida hoje?",
         "chat_placeholder": "Pergunte ao seu assistente educacional local...",
         "chat_badge": "💬 Chat de Mentoria de IA",
-        "lbl_no_models_warn": "⚠️ Nenhum modelo Gemma local detectado. Mostrando alvos de entrega."
+        "lbl_no_models_warn": "⚠️ Nenhum modelo Gemma local detectado. Mostrando alvos de entrega.",
+        "lbl_gap_out": "Lacuna de Aprendizagem",
+        "lbl_act_out": "Atividade de Reforço",
+        "lbl_guide_out": "Guia do Professor"
     },
     "Français": {
         "title": "📚 Teacher Coach AI",
         "subtitle": "Assistant pédagogique hors ligne propulsé par Gemma pour les écoles rurales.",
-        "badge_offline": "📴 Local · Faible coût · Prêt pour le mode hors ligne",
+        "badge_offline": "📴 Local · Faible Coût · Prêt pour le Mode Hors Ligne",
         "welcome_title": "## Bienvenue, enseignant",
-        "welcome_desc": "Analyse les notes des élèves, identifiez les lacunes d'apprentissage et recevez des recommandations pratiques pour améliorer les performances, même dans les endroits sans Internet.",
+        "welcome_desc": "Analysez les notes des élèves, identifiez les lacunes d'apprentissage et recevez des recommandations pratiques pour améliorer les performances en classe, même dans les endroits sans Internet.",
         "bullet_points": "- 📊 Analyse des performances des élèves\n- 🤖 Recommandations d'IA avec Gemma\n- 🧭 Alignement sur le programme\n- 👩‍🏫 Suivi personnalisé par élève",
         "login_card_title": "### Connexion Enseignant",
         "lbl_username": "Identifiant",
@@ -262,8 +271,8 @@ I18N = {
         "setup_badge": "🤖 Configuration de l'analyse d'IA",
         "tab_teacher": "Téléchargement Enseignant",
         "tab_admin": "Programme Administrateur",
-        "admin_title": "## Configuration du Programme Scolaire",
-        "admin_desc": "Téléchargez le programme de l'école ou le plan de cours de base. Cela devient le cadre éducatif minimal que Gemma doit suivre.",
+        "admin_title": "## Configuration du programme de base",
+        "admin_desc": "Téléchargez le contenu officiel, le programme national ou le plan de cours de base. Cela devient le cadre éducatif minimal que Gemma doit suivre.",
         "lbl_curr_source": "Source du programme",
         "lbl_grade": "Niveau d'études",
         "lbl_subject": "Matière",
@@ -271,10 +280,10 @@ I18N = {
         "lbl_align_inst": "Instructions d'alignement sur le programme",
         "curr_saved": "Programme enregistré avec succès.",
         "curr_err": "Erreur lors de la lecture du fichier du programme :",
-        "file_saved": "Fichier enregistré localement sous:",
+        "file_saved": "Fichier enregistré localement sous :",
         "curr_preview": "### Aperçu du Programme Scolaire",
         "curr_cols": "**Colonnes du Programme :** ",
-        "map_curr_title": "### Maper les Colonnes du Programme",
+        "map_curr_title": "### Mapper les Colonnes du Programme",
         "lbl_col_for": "Colonne pour",
         "map_success": "Mappage du programme appliqué avec succès.",
         "map_err": "Erreur lors de l'application du mappage :",
@@ -285,14 +294,14 @@ I18N = {
         "btn_download_template": "Télécharger le modèle Excel",
         "lbl_browse_student": "Parcourir le fichier Excel ou CSV des élèves",
         "lbl_teacher_inst": "Instructions supplémentaires pour Gemma",
-        "val_teacher_inst": "Concentrez-vous sur les élèves ayant une faible assiduité et des notes basses. Recommandez des activités simples qui ne nécessitent pas Internet ni de matériel coûteux.",
+        "val_teacher_inst": "Concentrez-vous sur les élèves ayant une faible assiduité et des notes basses. Recommandez des activités simples qui ne nécessitent ni connexion Internet ni matériel coûteux.",
         "student_uploaded_success": "Fichier de données des élèves téléchargé avec succès.",
-        "map_student_title": "### Maper les Colonnes du Fichier des Élèves",
+        "map_student_title": "### Mapper les Colonnes du Fichier des Élèves",
         "btn_apply_student_map": "Appliquer le Mappage des Élèves",
         "missing_cols_err": "Colonnes requises manquantes après le mappage : ",
         "student_map_success": "Mappage appliqué et données chargées avec succès.",
         "student_map_err": "Erreur lors de l'application du mappage des élèves :",
-        "no_file_info": "Aucun fichier téléchargé pour le moment. L'application utilisera des données d'exemple.",
+        "no_file_info": "Aucun fichier téléchargé pour le moment. L'application utilisera des données d'exemple pour la démonstration.",
         "model_time_info": "La génération de recommandations avec le modèle sélectionné peut prendre plusieurs secondes par élève.",
         "no_curr_warn": "⚠️ Aucun programme associé trouvé (admin_curriculum_example.csv).",
         "no_curr_info": "Une évaluation sans programme de base sera effectuée, limitant les recommandations aux bonnes pratiques générales.",
@@ -310,8 +319,8 @@ I18N = {
         "metric_weakest": "Matière la plus faible",
         "chart_title": "## Domaines d'Apprentissage Faibles par Matière",
         "rec_per_student_title": "## Recommandations par Élève",
-        "card_ai_rec": "<h3>🤖 Recommandations d'IA</h3><div class='recommendation'>Utilisez des exemples visuels et des objets de l'environnement pour les sujets faibles.</div><div class='recommendation'>Créez de petits groupes de soutien pour les élèves ayant des lacunes similaires.</div><div class='recommendation'>Appliquez de courtes évaluations hebdomadaires pour mesurer les progrès.</div>",
-        "card_weekly": "<h3>📅 Plan Hebdomadaire</h3><div class='recommendation'><b>Lundi:</b> Révision guidée des sujets faibles.</div><div class='recommendation'><b>Mercredi:</b> Pratique en petits groupes.</div><div class='recommendation'><b>Vendredi:</b> Mini évaluation et feedback.</div>",
+        "card_ai_rec": "<h3>🤖 Recommandations d'IA</h3><div class='recommendation'>Utilisez des exemples visuels et des objets de l'environnement pour les sujets faibles.</div><div class='recommendation'>Créez de petits groupes de soutien pour les élèves ayant des lacunes similaires.</div><div class='recommendation'>Appliquez de courtes évaluations hebdomadaires pour les progrès.</div>",
+        "card_weekly": "<h3>📅 Plan Hebdomadaire</h3><div class='recommendation'><b>Lundi :</b> Révision guidée des sujets faibles.</div><div class='recommendation'><b>Mercredi :</b> Pratique en petits groupes.</div><div class='recommendation'><b>Vendredi :</b> Mini-évaluation et feedback.</div>",
         "card_responsible": "<h3>🧭 IA Responsable</h3><div class='recommendation'>Les recommandations sont alignées sur le programme scolaire.</div><div class='recommendation'>Le système évite de stigmatiser négativement les élèves.</div><div class='recommendation'>L'enseignant reste maître des décisions.</div>",
         "btn_back_index": "Retour à l'Accueil",
         "prompt_lang": "French",
@@ -322,8 +331,11 @@ I18N = {
         "nav_chat": "💬 Conseiller Pédagogique Interactif",
         "chat_welcome": "Bonjour ! Je suis votre conseiller pédagogique local. Comment puis-je vous aider à concevoir des stratégies ou des exercices aujourd'hui ?",
         "chat_placeholder": "Demandez à votre assistant pédagogique local...",
-        "chat_badge": "💬 Mentorat d'IA en direct",
-        "lbl_no_models_warn": "⚠️ Aucun modèle Gemma local détecté. Affichage des cibles."
+        "chat_badge": "💬 Chat de mentorat IA",
+        "lbl_no_models_warn": "⚠️ Aucun modèle Gemma local détecté. Affichage des cibles.",
+        "lbl_gap_out": "Écart d'Apprentissage",
+        "lbl_act_out": "Activité de Renforcement",
+        "lbl_guide_out": "Guide de l'Enseignant"
     }
 }
 
@@ -412,15 +424,18 @@ def build_curriculum_description():
             text += f"{index + 1}. " + "; ".join(parts) + "\n"
     return text
 
-def get_gemma_recommendation(row, model_name, curriculum_description, target_lang):
+def get_gemma_recommendation(row, model_name, curriculum_description, target_lang, labels_out):
+    gap_lbl, act_lbl, guide_lbl = labels_out
     prompt = f"""
 Respond STRICTLY and ONLY in {target_lang}.
 Do not greet. Do not say "Hello". Do not say "As Gemma". Do not explain that you are an AI.
 
-Respond using this text layout block structure:
-Learning Gap:
-Reinforcement Activity:
-Teacher Guide:
+Respond using exactly this layout structure format structure:
+{gap_lbl}:
+
+{act_lbl}:
+
+{guide_lbl}:
 
 Maximum 80 words.
 
@@ -437,7 +452,11 @@ Student Performance Context Parameters:
     if curriculum_description:
         prompt += f"\nTake into account the following school curriculum framework:\n{curriculum_description}\nSuggest reinforcement activities aligned with indicators."
     else:
-        prompt += "\nNo institutional curriculum framework was found. Generate open pedagogical recommendations using educational best practices for low-resource classrooms. Do not assume internet access or expensive materials."
+        prompt += """
+No institutional curriculum framework was found.
+Generate open pedagogical recommendations using educational best practices for low-resource classrooms.
+CRITICAL DESIGN RULE: Do not assume internet access or expensive materials. Propose exercises using standard notebooks, blackboards, or environmental objects.
+"""
 
     prompt += f"\nRemember: Generate the entire response layout block strictly in {target_lang}."
 
@@ -447,13 +466,26 @@ Student Performance Context Parameters:
             messages=[
                 {"role": "system", "content": f"You are a helpful local educational advisor. You respond briefly, directly, and exclusively in {target_lang}."},
                 {"role": "user", "content": prompt}
-            ]
+            ],
+            options={
+                "num_ctx": 8192,       # 🎯 Espacio suficiente para el RAG de MEDUCA
+                "num_predict": 1200,   # 🚀 El cambio clave: Le da presupuesto a Gemma para pensar Y escribir la respuesta
+                "temperature": 0.3,    # 🔥 Mantiene el formato estructurado y evita divagaciones
+            }
         )
-        return response.get("message", {}).get("content", "").strip()
+        
+        # Cross-version parser block to guarantee response extraction
+        if hasattr(response, 'message') and hasattr(response.message, 'content'):
+            return response.message.content.strip()
+        elif isinstance(response, dict):
+            return response.get("message", {}).get("content", "").strip()
+        else:
+            return response["message"]["content"].strip()
+            
     except Exception as e:
         return f"Error generating recommendation: {e}"
 
-def generate_gemma_recommendations(df, model_name, curriculum_description, target_lang):
+def generate_gemma_recommendations(df, model_name, curriculum_description, target_lang, labels_out):
     records = df.to_dict(orient="records")
     total = len(records)
     progress = st.progress(0)
@@ -461,9 +493,10 @@ def generate_gemma_recommendations(df, model_name, curriculum_description, targe
     recommendations = [None] * total
     completed = 0
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+    # 🚀 CONTROLLED SINGLE WORKER THREAD PIPELINE TO AVOID CPU CONTEXT OVERHEAD
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
         future_to_index = {
-            executor.submit(get_gemma_recommendation, row, model_name, curriculum_description, target_lang): i 
+            executor.submit(get_gemma_recommendation, row, model_name, curriculum_description, target_lang, labels_out): i 
             for i, row in enumerate(records)
         }
         for future in concurrent.futures.as_completed(future_to_index):
@@ -474,13 +507,13 @@ def generate_gemma_recommendations(df, model_name, curriculum_description, targe
                 recommendations[i] = f"Error: {e}"
             completed += 1
             progress.progress(int(completed / total * 100))
-            status_text.text(f"⚡ Processing with threads: {completed} of {total} students completed using {model_name}...")
+            status_text.text(f"⚡ Processing: {completed} of {total} students completed using {model_name}...")
             
     progress.empty()
     status_text.empty()
     return recommendations
 
-def analyze_students(df, model_name, curriculum_description, target_lang):
+def analyze_students(df, model_name, curriculum_description, target_lang, labels_out):
     df = df.copy()
     df["Score"] = pd.to_numeric(df["Score"], errors="coerce")
     df["Attendance"] = pd.to_numeric(df["Attendance"], errors="coerce")
@@ -491,7 +524,7 @@ def analyze_students(df, model_name, curriculum_description, target_lang):
         return "Low"
 
     df["Risk_Level"] = df.apply(risk, axis=1)
-    df["Gemma_4_Recommendation"] = generate_gemma_recommendations(df, model_name, curriculum_description, target_lang)
+    df["Gemma_4_Recommendation"] = generate_gemma_recommendations(df, model_name, curriculum_description, target_lang, labels_out)
 
     summary = {
         "students": df["Student"].nunique(),
@@ -533,6 +566,7 @@ selected_lang = st.sidebar.selectbox(
     ["English", "Español", "Português", "Français"], 
     index=["English", "Español", "Português", "Français"].index(st.session_state.ui_lang)
 )
+st.sidebar.markdown("---")
 st.session_state.ui_lang = selected_lang
 t = I18N[st.session_state.ui_lang]
 
@@ -590,7 +624,7 @@ if st.session_state.screen == "login":
         st.markdown(t['login_card_title'])
         username = st.text_input(t['lbl_username'], value=st.session_state.get("username", ""))
         password = st.text_input(t['lbl_password'], type="password", value=st.session_state.get("password", "admin"))
-        if st.button(t['btn_login'], use_container_width=True):
+        if st.button(t['btn_login'], width='stretch'):
             if username == "admin" and password == "admin":
                 st.session_state.username = username
                 st.session_state.password = password
@@ -617,9 +651,9 @@ elif st.session_state.screen == "index" and st.session_state.current_page == "Di
 
         if st.session_state.get("curriculum_df") is not None:
             st.markdown(t['curr_preview'])
-            st.dataframe(st.session_state.curriculum_df.head(10), use_container_width=True)
+            st.dataframe(st.session_state.curriculum_df.head(10), width='stretch')
             
-        if st.button(t['btn_back_upload'], use_container_width=True):
+        if st.button(t['btn_back_upload'], width='stretch'):
             st.session_state.force_curriculum_view = False
             st.rerun()
     else:
@@ -634,6 +668,10 @@ elif st.session_state.screen == "index" and st.session_state.current_page == "Di
                     st.success(t['lbl_applied'])
                 except Exception as e: st.error(str(e))
 
+            if st.session_state.get("curriculum_df") is not None:
+                st.markdown(t['curr_preview'])
+                st.dataframe(st.session_state.curriculum_df.head(5), width='stretch')
+
         with tab1:
             st.markdown(t['upload_title'])
             st.write(t['upload_desc'])
@@ -645,7 +683,7 @@ elif st.session_state.screen == "index" and st.session_state.current_page == "Di
                 try:
                     st.session_state.df = load_uploaded_dataframe(uploaded_file)
                     st.success(t['student_uploaded_success'])
-                    st.dataframe(st.session_state.df.head(5), use_container_width=True)
+                    st.dataframe(st.session_state.df.head(5), width='stretch')
                 except Exception as e: st.error(str(e))
             else: st.info(t['no_file_info'])
 
@@ -658,18 +696,19 @@ elif st.session_state.screen == "index" and st.session_state.current_page == "Di
                 st.warning(t['no_curr_warn'])
                 st.info(t['no_curr_info'])
                 can_proceed = st.checkbox(t['chk_understand'], key="confirm_skip_curr")
-                if not can_proceed and st.button(t['btn_go_curr'], use_container_width=True):
+                if not can_proceed and st.button(t['btn_go_curr'], width='stretch'):
                      st.session_state.force_curriculum_view = True
                      st.rerun()
 
             if can_proceed:
-                if st.button(t['btn_analyze_gaps'], use_container_width=True):
+                if st.button(t['btn_analyze_gaps'], width='stretch'):
                     missing = validate_file(st.session_state.df)
                     if missing: st.error(t['err_missing_pre_analysis'] + ", ".join(missing))
                     else:
                         try:
                             curr_desc = build_curriculum_description()
-                            final_df, summary = analyze_students(st.session_state.df, st.session_state.selected_model, curr_desc, t['prompt_lang'])
+                            labels_out = (t['lbl_gap_out'], t['lbl_act_out'], t['lbl_guide_out'])
+                            final_df, summary = analyze_students(st.session_state.df, st.session_state.selected_model, curr_desc, t['prompt_lang'], labels_out)
                             st.session_state.analysis = {"df": final_df, "summary": summary}
                             st.session_state.screen = "dashboard"
                             st.rerun()
@@ -694,7 +733,7 @@ elif st.session_state.screen == "dashboard" and st.session_state.current_page ==
     st.bar_chart(df.groupby("Subject")["Score"].mean())
 
     st.markdown(t['rec_per_student_title'])
-    st.dataframe(df[["Student", "Grade", "Subject", "Topic", "Score", "Attendance", "Risk_Level", "Gemma_4_Recommendation"]], use_container_width=True)
+    st.dataframe(df[["Student", "Grade", "Subject", "Topic", "Score", "Attendance", "Risk_Level", "Gemma_4_Recommendation"]], width='stretch')
 
     col1, col2, col3 = st.columns(3)
     col1.markdown(f"<div class='card'>{t['card_ai_rec']}</div>", unsafe_allow_html=True)
@@ -726,9 +765,22 @@ elif st.session_state.current_page == "Chat":
                 system_prompt = f"You are a professional educational consultant mentor. Help the teacher design local strategies. Respond strictly and only in {t['prompt_lang']}."
                 response = ollama.chat(
                     model=st.session_state.selected_model,
-                    messages=[{"role": "system", "content": system_prompt}, *st.session_state.chat_history]
+                    messages=[{"role": "system", "content": system_prompt}, *st.session_state.chat_history],
+                    options={
+                        "num_ctx": 8192,       # 🎯 Espacio suficiente para el RAG de MEDUCA
+                        "num_predict": 1200,   # 🚀 El cambio clave: Le da presupuesto a Gemma para pensar Y escribir la respuesta
+                        "temperature": 0.3,    # 🔥 Mantiene el formato estructurado y evita divagaciones
+                    }
                 )
-                assistant_response = response.get("message", {}).get("content", "").strip()
+                
+                # Cross-version content discovery parser mapping loop
+                if hasattr(response, 'message') and hasattr(response.message, 'content'):
+                    assistant_response = response.message.content.strip()
+                elif isinstance(response, dict):
+                    assistant_response = response.get("message", {}).get("content", "").strip()
+                else:
+                    assistant_response = response["message"]["content"].strip()
+
                 response_placeholder.markdown(assistant_response)
                 st.session_state.chat_history.append({"role": "assistant", "content": assistant_response})
             except Exception as e: response_placeholder.error(f"Error calling local model: {e}")
