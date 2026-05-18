@@ -5,53 +5,357 @@ from io import BytesIO
 from pathlib import Path
 import concurrent.futures
 
-if "curriculum_df" not in st.session_state:
+# ==========================================
+# Internationalization (i18n) Master Dictionary
+# ==========================================
+I18N = {
+    "English": {
+        "title": "📚 Teacher Coach AI",
+        "subtitle": "Offline educational assistant powered by Gemma for rural and low-resource schools.",
+        "badge_offline": "📴 Local · Low Cost · Offline Ready",
+        "welcome_title": "## Welcome, teacher",
+        "welcome_desc": "Analyze student grades, identify learning gaps, and receive practical recommendations to improve classroom performance, even in places with limited internet access.",
+        "bullet_points": "- 📊 Student performance analysis\n- 🤖 Gemma AI recommendations\n- 🧭 Curriculum alignment\n- 👩‍🏫 Personalized support per student",
+        "login_card_title": "### Teacher Login",
+        "lbl_username": "Username",
+        "lbl_password": "Password",
+        "btn_login": "Login",
+        "btn_logout": "Logout",
+        "err_login": "Incorrect username or password. Use admin/admin.",
+        "setup_badge": "🤖 AI Analysis Setup",
+        "tab_teacher": "Teacher Upload",
+        "tab_admin": "Admin Curriculum",
+        "admin_title": "## Admin Curriculum Configuration",
+        "admin_desc": "Upload MEDUCA content, national curriculum, school director guidelines, or the teacher's base lesson plan. This becomes the minimum educational framework Gemma must follow.",
+        "lbl_curr_source": "Curriculum source",
+        "lbl_grade": "Grade level",
+        "lbl_subject": "Subject",
+        "lbl_browse_curr": "Browse curriculum file Framework (Excel/CSV/PDF/Docx)",
+        "lbl_align_inst": "Curriculum alignment instructions",
+        "curr_saved": "Curriculum saved successfully.",
+        "curr_err": "Error reading curriculum file:",
+        "file_saved": "File saved locally at:",
+        "curr_preview": "### Curriculum Preview",
+        "curr_cols": "**Curriculum Columns:** ",
+        "map_curr_title": "### Map Curriculum Columns",
+        "lbl_col_for": "Column for",
+        "map_success": "Curriculum mapping applied successfully.",
+        "map_err": "Error applying mapping:",
+        "curr_config_alert": "Curriculum configuration will guide Gemma recommendations.",
+        "btn_back_upload": "✅ Back to Teacher Upload",
+        "upload_title": "## Upload Student Performance Data",
+        "upload_desc": "Upload an Excel or CSV file with student grades, attendance, subjects, topics, and competencies.",
+        "btn_download_template": "Download Excel Template",
+        "lbl_browse_student": "Browse student Excel or CSV file",
+        "lbl_teacher_inst": "Additional teacher instructions for Gemma",
+        "val_teacher_inst": "Focus on students with low attendance and low scores. Recommend simple activities that do not require internet or expensive materials.",
+        "student_uploaded_success": "Student data file uploaded successfully.",
+        "map_student_title": "### Map Student File Columns",
+        "btn_apply_student_map": "Apply Student Mapping",
+        "missing_cols_err": "Missing required columns after mapping: ",
+        "student_map_success": "Mapping applied and data loaded successfully.",
+        "student_map_err": "Error applying student mapping:",
+        "no_file_info": "No file uploaded yet. The app will use sample student data for the demo.",
+        "model_time_info": "Recommendation generation with the selected model may take several seconds per student.",
+        "no_curr_warn": "⚠️ No attached curriculum found (admin_curriculum_example.csv).",
+        "no_curr_info": "An evaluation without a curriculum will be performed, limiting recommendations to general best practices.",
+        "chk_understand": "I understand, continue without a personalized curriculum",
+        "btn_go_curr": "❌ Go to configure curriculum",
+        "btn_analyze_gaps": "Analyze gaps with AI",
+        "err_missing_pre_analysis": "Missing required columns before analysis: ",
+        "err_ollama_gen": "An error occurred during Ollama recommendation generation. Please check model availability.",
+        "err_gen_rec_outer": "Error generating recommendations: ",
+        "insights_badge": "✨ AI Insights",
+        "dash_title": "## Teacher Analytics Dashboard",
+        "metric_students": "Students analyzed",
+        "metric_avg": "Class average",
+        "metric_at_risk": "Students needing support",
+        "metric_weakest": "Weakest subject",
+        "chart_title": "## Weak Learning Areas by Subject",
+        "rec_per_student_title": "## Recommendations per Student",
+        "card_ai_rec": "<h3>🤖 AI Recommendations</h3><div class='recommendation'>Use visual examples and classroom objects for weak topics.</div><div class='recommendation'>Create small support groups for students with similar learning gaps.</div><div class='recommendation'>Apply short weekly assessments to measure progress.</div>",
+        "card_weekly": "<h3>📅 Weekly Plan</h3><div class='recommendation'><b>Monday:</b> Guided review of weak topics.</div><div class='recommendation'><b>Wednesday:</b> Practice in small groups.</div><div class='recommendation'><b>Friday:</b> Mini assessment and feedback.</div>",
+        "card_responsible": "<h3>🧭 Responsible AI</h3><div class='recommendation'>Recommendations are aligned with curriculum guidance.</div><div class='recommendation'>The system avoids labeling students negatively.</div><div class='recommendation'>The teacher remains in control of decisions.</div>",
+        "btn_back_index": "Back to Index",
+        "prompt_lang": "English",
+        "none_select": "-- None --",
+        "lbl_applied": "Applied successfully",
+        "nav_heading": "🧭 Navigation",
+        "nav_diagnostics": "📊 Performance Diagnostics",
+        "nav_chat": "💬 Interactive Teacher Coach",
+        "chat_welcome": "Hello! I am your local pedagogical coach. How can I help you design classroom strategies or tailored reinforcement exercises today?",
+        "chat_placeholder": "Ask your local educational assistant...",
+        "chat_badge": "💬 AI Mentorship Chat",
+        "lbl_no_models_warn": "⚠️ No local Gemma models detected. Showing submission targets."
+    },
+    "Español": {
+        "title": "📚 Teacher Coach AI",
+        "subtitle": "Asistente educativo offline impulsado por Gemma para escuelas rurales de bajos recursos.",
+        "badge_offline": "📴 Local · Bajo Costo · Listo para Modo Offline",
+        "welcome_title": "## Bienvenido, docente",
+        "welcome_desc": "Analice las calificaciones de los estudiantes, identifique brechas de aprendizaje y reciba recomendaciones prácticas para mejorar el rendimiento en el aula, incluso en lugares sin internet.",
+        "bullet_points": "- 📊 Análisis de rendimiento estudiantil\n- 🤖 Recomendaciones de IA con Gemma\n- 🧭 Alineación curricular\n- 👩‍🏫 Apoyo personalizado por estudiante",
+        "login_card_title": "### Acceso Docente",
+        "lbl_username": "Usuario",
+        "lbl_password": "Contraseña",
+        "btn_login": "Iniciar Sesión",
+        "btn_logout": "Cerrar Sesión",
+        "err_login": "Usuario o contraseña incorrectos. Use admin/admin.",
+        "setup_badge": "🤖 Configuración de Análisis de IA",
+        "tab_teacher": "Carga del Docente",
+        "tab_admin": "Currículo Administrador",
+        "admin_title": "## Configuración del Currículo Base",
+        "admin_desc": "Cargue los contenidos de MEDUCA, currículo nacional, directrices de la escuela o el plan de lecciones base. Este se convierte en el marco educativo mínimo que Gemma debe seguir.",
+        "lbl_curr_source": "Fuente del currículo",
+        "lbl_grade": "Nivel de grado",
+        "lbl_subject": "Materia",
+        "lbl_browse_curr": "Buscar archivo de marco curricular (Excel/CSV/PDF/Docx)",
+        "lbl_align_inst": "Instrucciones de alineación curricular",
+        "curr_saved": "Currículo guardado exitosamente.",
+        "curr_err": "Error al leer el archivo de currículo:",
+        "file_saved": "Archivo guardado localmente en:",
+        "curr_preview": "### Vista Previa del Currículo",
+        "curr_cols": "**Columnas del Currículo:** ",
+        "map_curr_title": "### Mapear Columnas del Currículo",
+        "lbl_col_for": "Columna para",
+        "map_success": "Mapeo de currículo aplicado exitosamente.",
+        "map_err": "Error al aplicar el mapeo:",
+        "curr_config_alert": "La configuración del currículo guiará las recomendaciones de Gemma.",
+        "btn_back_upload": "✅ Volver a Carga del Docente",
+        "upload_title": "## Cargar Datos de Rendimiento Estudiantil",
+        "upload_desc": "Cargue un archivo Excel o CSV con las calificaciones, asistencia, materias, temas y competencias de los estudiantes.",
+        "btn_download_template": "Descargar Plantilla de Excel",
+        "lbl_browse_student": "Buscar archivo Excel o CSV de estudiantes",
+        "lbl_teacher_inst": "Instrucciones adicionales del docente para Gemma",
+        "val_teacher_inst": "Enfócate en estudiantes con baja asistencia y bajas calificaciones. Recomienda actividades simples que no requieran internet ni materiales costosos.",
+        "student_uploaded_success": "Archivo de datos de estudiantes cargado exitosamente.",
+        "map_student_title": "### Mapear Columnas del Archivo de Estudiantes",
+        "btn_apply_student_map": "Aplicar Mapeo de Estudiantes",
+        "missing_cols_err": "Faltan columnas obligatorias después del mapeo: ",
+        "student_map_success": "Mapeo aplicado y datos cargados exitosamente.",
+        "student_map_err": "Error al aplicar el mapeo de estudiantes:",
+        "no_file_info": "Ningún archivo cargado aún. La aplicación usará datos de muestra para la demostración.",
+        "model_time_info": "La generación de recomendaciones con el modelo seleccionado puede tardar varios segundos por estudiante.",
+        "no_curr_warn": "⚠️ No se encontró un currículo adjunto (admin_curriculum_example.csv).",
+        "no_curr_info": "Se realizará una evaluación sin currículo base, limitando las recomendaciones a buenas prácticas generales.",
+        "chk_understand": "Entiendo, continuar sin un currículo personalizado",
+        "btn_go_curr": "❌ Ir a configurar currículo",
+        "btn_analyze_gaps": "Analizar brechas con IA",
+        "err_missing_pre_analysis": "Faltan columnas requeridas antes del análisis: ",
+        "err_ollama_gen": "Ocurrió un error durante la generación de recomendaciones en Ollama. Por favor verifique la disponibilidad del modelo.",
+        "err_gen_rec_outer": "Error al generar recomendaciones: ",
+        "insights_badge": "✨ Análisis de IA",
+        "dash_title": "## Panel de Analítica Docente",
+        "metric_students": "Estudiantes analizados",
+        "metric_avg": "Promedio de la clase",
+        "metric_at_risk": "Estudiantes que requieren apoyo",
+        "metric_weakest": "Materia más débil",
+        "chart_title": "## Áreas de Aprendizaje Débiles por Materia",
+        "rec_per_student_title": "## Recomendaciones por Estudiante",
+        "card_ai_rec": "<h3>🤖 Recomendaciones de IA</h3><div class='recommendation'>Use ejemplos visuales y objetos del entorno para temas débiles.</div><div class='recommendation'>Cree pequeños grupos de apoyo para estudiantes con brechas similares.</div><div class='recommendation'>Aplique evaluaciones cortas semanales para medir el progreso.</div>",
+        "card_weekly": "<h3>📅 Plan Semanal</h3><div class='recommendation'><b>Lunes:</b> Repaso de temas débiles.</div><div class='recommendation'><b>Miércoles:</b> Práctica en grupos pequeños.</div><div class='recommendation'><b>Viernes:</b> Mini evaluación y retroalimentación.</div>",
+        "card_responsible": "<h3>🧭 IA Responsable</h3><div class='recommendation'>Las recomendaciones están alineadas con la guía curricular.</div><div class='recommendation'>El sistema evita etiquetar negativamente a los alumnos.</div><div class='recommendation'>El docente mantiene el control de las decisiones.</div>",
+        "btn_back_index": "Volver al Inicio",
+        "prompt_lang": "Spanish",
+        "none_select": "-- Ninguna --",
+        "lbl_applied": "Aplicado con éxito",
+        "nav_heading": "🧭 Navegación",
+        "nav_diagnostics": "📊 Diagnóstico de Rendimiento",
+        "nav_chat": "💬 Asesor Pedagógico Interactivo",
+        "chat_welcome": "¡Hola! Soy tu asesor pedagógico local. ¿Cómo te puedo ayudar a diseñar estrategias didácticas o ejercicios de reforzamiento hoy?",
+        "chat_placeholder": "Pregúntale a tu asistente educativo local...",
+        "chat_badge": "💬 Chat de Mentoría de IA",
+        "lbl_no_models_warn": "⚠️ No se detectaron modelos Gemma locales. Mostrando objetivos de entrega."
+    },
+    "Português": {
+        "title": "📚 Teacher Coach AI",
+        "subtitle": "Assistente educacional offline impulsionado por Gemma para escolas rurais e de poucos recursos.",
+        "badge_offline": "📴 Local · Baixo Custo · Pronto para Modo Offline",
+        "welcome_title": "## Bem-vindo, professor",
+        "welcome_desc": "Analise as notas dos alunos, identifique lacunas de aprendizagem e receba recomendações práticas para melhorar o desempenho escolar, mesmo em locais sem internet.",
+        "bullet_points": "- 📊 Análise de desempenho dos alunos\n- 🤖 Recomendações de IA com Gemma\n- 🧭 Alinhamento curricular\n- 👩‍🏫 Apoio personalizado por aluno",
+        "login_card_title": "### Acesso do Professor",
+        "lbl_username": "Usuário",
+        "lbl_password": "Senha",
+        "btn_login": "Entrar",
+        "btn_logout": "Sair",
+        "err_login": "Usuário ou senha incorretos. Use admin/admin.",
+        "setup_badge": "🤖 Configuração de Análise de IA",
+        "tab_teacher": "Upload do Professor",
+        "tab_admin": "Currículo Administrator",
+        "admin_title": "## Configuração do Currículo Base",
+        "admin_desc": "Faça o upload dos conteúdos curriculares oficiais ou plano de aulas base. Este se torna o modelo educacional mínimo que o Gemma deve seguir.",
+        "lbl_curr_source": "Fonte do currículo",
+        "lbl_grade": "Nível de escolaridade",
+        "lbl_subject": "Matéria",
+        "lbl_browse_curr": "Buscar arquivo de marco curricular (Excel/CSV/PDF/Docx)",
+        "lbl_align_inst": "Instruções de alinhamento curricular",
+        "curr_saved": "Currículo salvo com sucesso.",
+        "curr_err": "Erro ao ler o arquivo de currículo:",
+        "file_saved": "Arquivo salvo localmente em:",
+        "curr_preview": "### Visualização do Currículo",
+        "curr_cols": "**Colunas do Currículo:** ",
+        "map_curr_title": "### Mapear Colunas do Currículo",
+        "lbl_col_for": "Coluna para",
+        "map_success": "Mapeamento de currículo aplicado com sucesso.",
+        "map_err": "Erro ao aplicar o mappamento:",
+        "curr_config_alert": "A configuração do currículo guiará as recomendações do Gemma.",
+        "btn_back_upload": "✅ Voltar ao Upload do Professor",
+        "upload_title": "## Carregar Dados de Desempenho dos Alunos",
+        "upload_desc": "Carregue um arquivo Excel ou CSV com as notas, frequência, matérias, tópicos e competências dos alunos.",
+        "btn_download_template": "Baixar Modelo de Excel",
+        "lbl_browse_student": "Buscar arquivo Excel ou CSV de alunos",
+        "lbl_teacher_inst": "Instruções adicionais do professor para o Gemma",
+        "val_teacher_inst": "Concentre-se em alunos com baixa frequência e notas baixas. Recomende atividades simples que não exijam internet ou materiais caros.",
+        "student_uploaded_success": "Arquivo de dados dos alunos carregado com sucesso.",
+        "map_student_title": "### Mapear Colunas do Archivo de Alunos",
+        "btn_apply_student_map": "Aplicar Mapeamento de Alunos",
+        "missing_cols_err": "Faltam colunas obrigatórias após o mapeamento: ",
+        "student_map_success": "Mapeamento aplicado e dados carregados com sucesso.",
+        "student_map_err": "Erro ao aplicar o mapeamento de alunos:",
+        "no_file_info": "Nenhum arquivo carregado ainda. O aplicativo usará dados de amostra para a demonstração.",
+        "model_time_info": "A geração de recomendações com o modelo selecionado pode levar vários segundos por aluno.",
+        "no_curr_warn": "⚠️ Nenhum currículo anexado (admin_curriculum_example.csv).",
+        "no_curr_info": "Será realizada uma avaliação sem currículo base, limitando as recomendações às boas práticas gerais.",
+        "chk_understand": "Compreendo, continuar sem um currículo personalizado",
+        "btn_go_curr": "❌ Ir para configurar currículo",
+        "btn_analyze_gaps": "Analisar lacunas com IA",
+        "err_missing_pre_analysis": "Faltam colunas obrigatórias antes da análise: ",
+        "err_ollama_gen": "Ocorreu um erro durante a geração de recomendações no Ollama. Verifique a disponibilidade do modelo.",
+        "err_gen_rec_outer": "Erro ao gerar recomendações: ",
+        "insights_badge": "✨ Análise da IA",
+        "dash_title": "## Painel de Análise do Professor",
+        "metric_students": "Alunos analisados",
+        "metric_avg": "Média da turma",
+        "metric_at_risk": "Alunos que precisam de apoio",
+        "metric_weakest": "Matéria mais fraca",
+        "chart_title": "## Áreas de Aprendizagem Fracas por Matéria",
+        "rec_per_student_title": "## Recomendações por Aluno",
+        "card_ai_rec": "<h3>🤖 Recomendações de IA</h3><div class='recommendation'>Use exemplos visuais e objetos do ambiente para temas fracos.</div><div class='recommendation'>Crie pequenos grupos de apoio para alunos com lacunas semelhantes.</div><div class='recommendation'>Aplique avaliações curtas semanais para medir o progresso.</div>",
+        "card_weekly": "<h3>📅 Plano Semanal</h3><div class='recommendation'><b>Segunda-feira:</b> Revisão guiada de temas fracos.</div><div class='recommendation'><b>Quarta-feira:</b> Prática em pequenos grupos.</div><div class='recommendation'><b>Sexta-feira:</b> Mini avaliação e feedback.</div>",
+        "card_responsible": "<h3>🧭 IA Responsable</h3><div class='recommendation'>As recomendações estão alinhadas com as diretrizes curriculares.</div><div class='recommendation'>O sistema evita rotular os alunos negativamente.</div><div class='recommendation'>O professor mantém o controle das decisões.</div>",
+        "btn_back_index": "Voltar ao Início",
+        "prompt_lang": "Portuguese",
+        "none_select": "-- Nenhuma --",
+        "lbl_applied": "Aplicado com sucesso",
+        "nav_heading": "🧭 Navigation",
+        "nav_diagnostics": "📊 Diagnóstico de Desempenho",
+        "nav_chat": "💬 Tutor Pedagógico Interativo",
+        "chat_welcome": "Olá! Sou o seu tutor pedagógico local. Como posso ajudar você a planejar estratégias didáticas ou exercícios sob medida hoje?",
+        "chat_placeholder": "Pergunte ao seu assistente educacional local...",
+        "chat_badge": "💬 Chat de Mentoria de IA",
+        "lbl_no_models_warn": "⚠️ Nenhum modelo Gemma local detectado. Mostrando alvos de entrega."
+    },
+    "Français": {
+        "title": "📚 Teacher Coach AI",
+        "subtitle": "Assistant pédagogique hors ligne propulsé par Gemma pour les écoles rurales.",
+        "badge_offline": "📴 Local · Faible coût · Prêt pour le mode hors ligne",
+        "welcome_title": "## Bienvenue, enseignant",
+        "welcome_desc": "Analyse les notes des élèves, identifiez les lacunes d'apprentissage et recevez des recommandations pratiques pour améliorer les performances, même dans les endroits sans Internet.",
+        "bullet_points": "- 📊 Analyse des performances des élèves\n- 🤖 Recommandations d'IA avec Gemma\n- 🧭 Alignement sur le programme\n- 👩‍🏫 Suivi personnalisé par élève",
+        "login_card_title": "### Connexion Enseignant",
+        "lbl_username": "Identifiant",
+        "lbl_password": "Mot de passe",
+        "btn_login": "Se connecter",
+        "btn_logout": "Se déconnecter",
+        "err_login": "Identifiant ou mot de passe incorrect. Utilisez admin/admin.",
+        "setup_badge": "🤖 Configuration de l'analyse d'IA",
+        "tab_teacher": "Téléchargement Enseignant",
+        "tab_admin": "Programme Administrateur",
+        "admin_title": "## Configuration du Programme Scolaire",
+        "admin_desc": "Téléchargez le programme de l'école ou le plan de cours de base. Cela devient le cadre éducatif minimal que Gemma doit suivre.",
+        "lbl_curr_source": "Source du programme",
+        "lbl_grade": "Niveau d'études",
+        "lbl_subject": "Matière",
+        "lbl_browse_curr": "Parcourir le fichier du programme d'études (Excel/CSV/PDF/Docx)",
+        "lbl_align_inst": "Instructions d'alignement sur le programme",
+        "curr_saved": "Programme enregistré avec succès.",
+        "curr_err": "Erreur lors de la lecture du fichier du programme :",
+        "file_saved": "Fichier enregistré localement sous:",
+        "curr_preview": "### Aperçu du Programme Scolaire",
+        "curr_cols": "**Colonnes du Programme :** ",
+        "map_curr_title": "### Maper les Colonnes du Programme",
+        "lbl_col_for": "Colonne pour",
+        "map_success": "Mappage du programme appliqué avec succès.",
+        "map_err": "Erreur lors de l'application du mappage :",
+        "curr_config_alert": "La configuration du programme guidera les recommandations de Gemma.",
+        "btn_back_upload": "✅ Retour au téléchargement",
+        "upload_title": "## Télécharger les Données des Élèves",
+        "upload_desc": "Téléchargez un fichier Excel ou CSV contenant les notes, l'assiduité, les matières, les sujets et les compétences des élèves.",
+        "btn_download_template": "Télécharger le modèle Excel",
+        "lbl_browse_student": "Parcourir le fichier Excel ou CSV des élèves",
+        "lbl_teacher_inst": "Instructions supplémentaires pour Gemma",
+        "val_teacher_inst": "Concentrez-vous sur les élèves ayant une faible assiduité et des notes basses. Recommandez des activités simples qui ne nécessitent pas Internet ni de matériel coûteux.",
+        "student_uploaded_success": "Fichier de données des élèves téléchargé avec succès.",
+        "map_student_title": "### Maper les Colonnes du Fichier des Élèves",
+        "btn_apply_student_map": "Appliquer le Mappage des Élèves",
+        "missing_cols_err": "Colonnes requises manquantes après le mappage : ",
+        "student_map_success": "Mappage appliqué et données chargées avec succès.",
+        "student_map_err": "Erreur lors de l'application du mappage des élèves :",
+        "no_file_info": "Aucun fichier téléchargé pour le moment. L'application utilisera des données d'exemple.",
+        "model_time_info": "La génération de recommandations avec le modèle sélectionné peut prendre plusieurs secondes par élève.",
+        "no_curr_warn": "⚠️ Aucun programme associé trouvé (admin_curriculum_example.csv).",
+        "no_curr_info": "Une évaluation sans programme de base sera effectuée, limitant les recommandations aux bonnes pratiques générales.",
+        "chk_understand": "Je comprends, continuer sans programme personnalisé",
+        "btn_go_curr": "❌ Aller à la configuration du programme",
+        "btn_analyze_gaps": "Analyser les lacunes avec l'IA",
+        "err_missing_pre_analysis": "Colonnes requises manquantes avant l'analyse : ",
+        "err_ollama_gen": "Une erreur est survenue lors de la génération avec Ollama. Veuillez vérifier la disponibilité du modèle.",
+        "err_gen_rec_outer": "Erreur lors de la génération des recommandations : ",
+        "insights_badge": "✨ Analyse de l'IA",
+        "dash_title": "## Tableau de Bord de l'Enseignant",
+        "metric_students": "Élèves analysés",
+        "metric_avg": "Moyenne de la classe",
+        "metric_at_risk": "Élèves ayant besoin de soutien",
+        "metric_weakest": "Matière la plus faible",
+        "chart_title": "## Domaines d'Apprentissage Faibles par Matière",
+        "rec_per_student_title": "## Recommandations par Élève",
+        "card_ai_rec": "<h3>🤖 Recommandations d'IA</h3><div class='recommendation'>Utilisez des exemples visuels et des objets de l'environnement pour les sujets faibles.</div><div class='recommendation'>Créez de petits groupes de soutien pour les élèves ayant des lacunes similaires.</div><div class='recommendation'>Appliquez de courtes évaluations hebdomadaires pour mesurer les progrès.</div>",
+        "card_weekly": "<h3>📅 Plan Hebdomadaire</h3><div class='recommendation'><b>Lundi:</b> Révision guidée des sujets faibles.</div><div class='recommendation'><b>Mercredi:</b> Pratique en petits groupes.</div><div class='recommendation'><b>Vendredi:</b> Mini évaluation et feedback.</div>",
+        "card_responsible": "<h3>🧭 IA Responsable</h3><div class='recommendation'>Les recommandations sont alignées sur le programme scolaire.</div><div class='recommendation'>Le système évite de stigmatiser négativement les élèves.</div><div class='recommendation'>L'enseignant reste maître des décisions.</div>",
+        "btn_back_index": "Retour à l'Accueil",
+        "prompt_lang": "French",
+        "none_select": "-- Aucun --",
+        "lbl_applied": "Appliqué avec succès",
+        "nav_heading": "🧭 Navigation",
+        "nav_diagnostics": "📊 Diagnostic des Performances",
+        "nav_chat": "💬 Conseiller Pédagogique Interactif",
+        "chat_welcome": "Bonjour ! Je suis votre conseiller pédagogique local. Comment puis-je vous aider à concevoir des stratégies ou des exercices aujourd'hui ?",
+        "chat_placeholder": "Demandez à votre assistant pédagogique local...",
+        "chat_badge": "💬 Mentorat d'IA en direct",
+        "lbl_no_models_warn": "⚠️ Aucun modèle Gemma local détecté. Affichage des cibles."
+    }
+}
+
+# ==========================================
+# Core Functions Definition Block (Python Roadmap)
+# ==========================================
+def get_local_gemma_models():
+    """Interrogates local Ollama daemon to find downloaded variants safely."""
     try:
-        st.session_state.curriculum_df = pd.read_csv("data/admin_curriculum_example.csv")
+        response = ollama.list()
+        models_list = []
+        if hasattr(response, 'models'):
+            models_list = response.models
+        elif isinstance(response, dict):
+            models_list = response.get('models', [])
+        else:
+            models_list = getattr(response, 'models', [])
+
+        gemma_detected = []
+        for model in models_list:
+            name = ""
+            if hasattr(model, 'model'): name = model.model
+            elif hasattr(model, 'name'): name = model.name
+            elif isinstance(model, dict): name = model.get('name', model.get('model', ''))
+            
+            if name and 'gemma' in name.lower():
+                gemma_detected.append(name)
+        return gemma_detected
     except Exception:
-        st.session_state.curriculum_df = None
+        return []
 
-CURRICULUM_UPLOAD_DIR = Path("curriculum_uploads")
-CURRICULUM_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-UPLOAD_DIR = Path("uploads")
-UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-
-st.set_page_config(page_title="Teacher Coach AI", page_icon="📚", layout="wide")
-
-# ==========================================
-# Gemma Model Configuration (Official V4)
-# ==========================================
-OLLAMA_MODELS = [
-    "gemma4:e2b",  # Lightweight Edge model (Default)
-    "gemma4:e4b",  # Medium Edge model
-    "gemma4:26b",  # Heavy reasoning model
-    "gemma4:31b",  # Advanced reasoning model
-    "gemma4",
-]
-
-selected_model = st.sidebar.selectbox(
-    "Select Gemma/Ollama model",
-    OLLAMA_MODELS,
-    index=0
-)
-
-st.session_state.selected_model = selected_model
-
-st.markdown("""
-<style>
-.block-container { padding-top: 2rem; padding-bottom: 3rem; }
-.title { font-size:42px; font-weight:900; color:#0f172a; margin-bottom:6px; }
-.subtitle { font-size:18px; color:#475569; margin-bottom:24px; }
-.card { background:white; padding:24px; border-radius:24px; border:1px solid #e2e8f0; box-shadow:0 12px 35px rgba(15,23,42,.08); margin-bottom:18px; }
-.badge { display:inline-block; background:#eef6ff; color:#1d4ed8; padding:8px 14px; border-radius:999px; font-weight:800; margin-bottom:12px; }
-.offline { background:#fef3c7; color:#92400e; }
-.metric { background:white; padding:20px; border-radius:20px; border:1px solid #e2e8f0; box-shadow:0 10px 25px rgba(15,23,42,.06); }
-.metric-label { color:#64748b; font-size:14px; font-weight:700; }
-.metric-value { color:#0f172a; font-size:32px; font-weight:900; }
-.recommendation { background:#f8fafc; border:1px solid #e2e8f0; padding:14px; border-radius:16px; margin-bottom:10px; color:#334155; }
-</style>
-""", unsafe_allow_html=True)
-
+# Robust Master Mock Data Definition
 sample_data = pd.DataFrame({
     "Student": ["Ana", "Luis", "Marta", "Carlos", "Sofia", "Pedro", "Elena", "Diego"],
     "Grade": [5, 5, 5, 5, 5, 5, 5, 5],
@@ -74,11 +378,6 @@ def create_template():
     output.seek(0)
     return output
 
-def read_uploaded_file(file):
-    if file.name.endswith(".csv"):
-        return pd.read_csv(file)
-    return pd.read_excel(file)
-
 def load_uploaded_dataframe(uploaded_file):
     content = uploaded_file.getvalue()
     if uploaded_file.name.lower().endswith(".csv"):
@@ -95,74 +394,37 @@ def save_uploaded_file(uploaded_file, save_dir):
 def validate_file(df):
     return [col for col in required_columns if col not in df.columns]
 
-# Executed safely on the Main Thread
 def build_curriculum_description():
-
-    # 1. Intentar usar curriculum subido por docente/admin
     curriculum_df = st.session_state.get("curriculum_df")
-
-    # 2. Si no existe, cargar curriculum default
     if curriculum_df is None or curriculum_df.empty:
-        default_path = Path("data/admin_curriculum_example.csv")
+        return ""
 
-        if default_path.exists():
-            try:
-                curriculum_df = pd.read_csv(default_path)
-            except Exception:
-                curriculum_df = None
-
-    # 3. Si aun no existe nada
-    if curriculum_df is None or curriculum_df.empty:
-        return "Use general teaching recommendations aligned with the uploaded student data."
-
-    # 4. Construir descripción curriculum
     text = "Curriculum guidelines found:\n"
-
-    target_columns = [
-        "Subject",
-        "Topic",
-        "Objectives",
-        "Contents",
-        "Indicators",
-        "Activities"
-    ]
-
+    target_columns = ["Subject", "Topic", "Objectives", "Contents", "Indicators", "Activities"]
     available_cols = [c for c in target_columns if c in curriculum_df.columns]
-
+    
     if not available_cols:
         available_cols = list(curriculum_df.columns[:4])
 
-    for index, row in curriculum_df.head(3).fillna("").iterrows():
-
-        parts = [
-            f"{col}: {row[col]}"
-            for col in available_cols
-            if str(row[col]).strip()
-        ]
-
+    for index, row in curriculum_df.head(5).fillna("").iterrows():
+        parts = [f"{col}: {row[col]}" for col in available_cols if str(row[col]).strip()]
         if parts:
             text += f"{index + 1}. " + "; ".join(parts) + "\n"
-
-    text += "\nUse this curriculum to validate learning gaps and propose aligned activities."
-
     return text
 
-# Thread-safe function: All context is explicitly passed as arguments
-def get_gemma_recommendation(row, model_name, curriculum_description):
+def get_gemma_recommendation(row, model_name, curriculum_description, target_lang):
     prompt = f"""
-Respond ONLY with this format.
-Do not greet.
-Do not say "Hello".
-Do not say "As Gemma".
-Do not explain that you are an AI.
+Respond STRICTLY and ONLY in {target_lang}.
+Do not greet. Do not say "Hello". Do not say "As Gemma". Do not explain that you are an AI.
 
+Respond using this text layout block structure:
 Learning Gap:
 Reinforcement Activity:
 Teacher Guide:
 
 Maximum 80 words.
 
-Student Data:
+Student Performance Context Parameters:
 - Name: {row.get('Student', '')}
 - Grade: {row.get('Grade', '')}
 - Subject: {row.get('Subject', '')}
@@ -173,89 +435,43 @@ Student Data:
 """
 
     if curriculum_description:
-        prompt += f"""
-Take into account the following school curriculum when generating the recommendation:
-
-{curriculum_description}
-
-Educational Context:
-- Curriculum Source: {st.session_state.get("curriculum_source")}
-- Grade Level: {st.session_state.get("curriculum_grade")}
-- Subjects: {st.session_state.get("curriculum_subject")}
-- Teacher Guidance: {st.session_state.get("curriculum_instructions")}
-
-Validate the student's learning gap based on this curriculum.
-
-Suggest activities aligned with:
-- objectives
-- contents
-- indicators
-- classroom activities
-
-The recommendation MUST explicitly align with the uploaded curriculum.
-
-If the gap cannot be directly covered by the curriculum,
-suggest complementary activities that respect its objectives.
-"""
+        prompt += f"\nTake into account the following school curriculum framework:\n{curriculum_description}\nSuggest reinforcement activities aligned with indicators."
     else:
-        prompt += """
-No specific curriculum was found.
-Generate open pedagogical recommendations using educational best practices for low-resource classrooms.
-Do not assume internet access or expensive materials.
-"""
+        prompt += "\nNo institutional curriculum framework was found. Generate open pedagogical recommendations using educational best practices for low-resource classrooms. Do not assume internet access or expensive materials."
 
-    prompt += """
-Generate a practical and brief recommendation for the teacher.
-
-Include:
-1. Learning Gap
-2. Reinforcement Activity
-3. Brief guide for the teacher
-"""
-
+    prompt += f"\nRemember: Generate the entire response layout block strictly in {target_lang}."
 
     try:
         response = ollama.chat(
             model=model_name,
             messages=[
-                {
-                    "role": "system",
-                    "content": "You are an educational assistant. You respond briefly, directly, and in a structured format. No greetings."
-                },
-                {
-                    "role": "user",
-                    "content": prompt
-                }
+                {"role": "system", "content": f"You are a helpful local educational advisor. You respond briefly, directly, and exclusively in {target_lang}."},
+                {"role": "user", "content": prompt}
             ]
         )
         return response.get("message", {}).get("content", "").strip()
     except Exception as e:
         return f"Error generating recommendation: {e}"
 
-# Thread-safe execution pipeline
-def generate_gemma_recommendations(df, model_name, curriculum_description):
+def generate_gemma_recommendations(df, model_name, curriculum_description, target_lang):
     records = df.to_dict(orient="records")
     total = len(records)
     progress = st.progress(0)
     status_text = st.empty()
-    
     recommendations = [None] * total
     completed = 0
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
-        # Explicitly passing model_name and curriculum_description to the worker threads
         future_to_index = {
-            executor.submit(get_gemma_recommendation, row, model_name, curriculum_description): i 
+            executor.submit(get_gemma_recommendation, row, model_name, curriculum_description, target_lang): i 
             for i, row in enumerate(records)
         }
-        
         for future in concurrent.futures.as_completed(future_to_index):
             i = future_to_index[future]
             try:
                 recommendations[i] = future.result()
             except Exception as e:
-                recommendations[i] = f"Error generating recommendation: {e}"
-            
+                recommendations[i] = f"Error: {e}"
             completed += 1
             progress.progress(int(completed / total * 100))
             status_text.text(f"⚡ Processing with threads: {completed} of {total} students completed using {model_name}...")
@@ -264,21 +480,18 @@ def generate_gemma_recommendations(df, model_name, curriculum_description):
     status_text.empty()
     return recommendations
 
-
-def analyze_students(df, model_name, curriculum_description):
+def analyze_students(df, model_name, curriculum_description, target_lang):
     df = df.copy()
     df["Score"] = pd.to_numeric(df["Score"], errors="coerce")
     df["Attendance"] = pd.to_numeric(df["Attendance"], errors="coerce")
 
     def risk(row):
-        if row["Score"] < 60 or row["Attendance"] < 80:
-            return "High"
-        if row["Score"] < 70:
-            return "Medium"
+        if row["Score"] < 60 or row["Attendance"] < 80: return "High"
+        if row["Score"] < 70: return "Medium"
         return "Low"
 
     df["Risk_Level"] = df.apply(risk, axis=1)
-    df["Gemma_4_Recommendation"] = generate_gemma_recommendations(df, model_name, curriculum_description)
+    df["Gemma_4_Recommendation"] = generate_gemma_recommendations(df, model_name, curriculum_description, target_lang)
 
     summary = {
         "students": df["Student"].nunique(),
@@ -288,311 +501,235 @@ def analyze_students(df, model_name, curriculum_description):
     }
     return df, summary
 
+# ==========================================
+# Application State Initialization Controller
+# ==========================================
 if "screen" not in st.session_state:
     st.session_state.screen = "login"
+if "ui_lang" not in st.session_state:
+    st.session_state.ui_lang = "English"
+if "current_page" not in st.session_state:
+    st.session_state.current_page = "Diagnostics"
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
 if "df" not in st.session_state:
     st.session_state.df = sample_data.copy()
 if "analysis" not in st.session_state:
     st.session_state.analysis = None
-if "curriculum_file_path" not in st.session_state:
-    st.session_state.curriculum_file_path = ""
-if "student_column_mapping" not in st.session_state:
-    st.session_state.student_column_mapping = {}
-if "curriculum_column_mapping" not in st.session_state:
-    st.session_state.curriculum_column_mapping = {}
-if "curriculum_source" not in st.session_state:
-    st.session_state.curriculum_source = "MEDUCA"
-if "curriculum_grade" not in st.session_state:
-    st.session_state.curriculum_grade = "5th Grade"
-if "curriculum_subject" not in st.session_state:
-    st.session_state.curriculum_subject = "Math / Reading / Science"
-if "curriculum_instructions" not in st.session_state:
-    st.session_state.curriculum_instructions = "Align recommendations with the official curriculum. Do not suggest content outside the current school plan unless it reinforces required learning objectives."
-if "username" not in st.session_state:
-    st.session_state.username = ""
-if "password" not in st.session_state:
-    st.session_state.password = "admin"
-if "active_tab" not in st.session_state:
-    st.session_state.active_tab = 0
 if "force_curriculum_view" not in st.session_state:
     st.session_state.force_curriculum_view = False
+if "curriculum_df" not in st.session_state:
+    try:
+        st.session_state.curriculum_df = pd.read_csv("data/admin_curriculum_example.csv")
+    except Exception:
+        st.session_state.curriculum_df = None
 
-st.markdown("<div class='title'>📚 Teacher Coach AI</div>", unsafe_allow_html=True)
-st.markdown("<div class='subtitle'>Offline educational assistant powered by Gemma for rural and low-resource schools.</div>", unsafe_allow_html=True)
+# ==========================================
+# Sidebar Execution View (Safe Order Placement)
+# ==========================================
+st.sidebar.markdown("### 🌍 Language / Idioma")
+selected_lang = st.sidebar.selectbox(
+    "Interface Language", 
+    ["English", "Español", "Português", "Français"], 
+    index=["English", "Español", "Português", "Français"].index(st.session_state.ui_lang)
+)
+st.session_state.ui_lang = selected_lang
+t = I18N[st.session_state.ui_lang]
 
+# Execute Dynamic Local Discovering Service
+discovered_models = get_local_gemma_models()
+
+if discovered_models:
+    OLLAMA_MODELS = discovered_models
+else:
+    OLLAMA_MODELS = ["gemma4:e2b", "gemma4:e4b", "gemma4:26b", "gemma4:31b"]
+    st.sidebar.warning(t["lbl_no_models_warn"])
+
+selected_model = st.sidebar.selectbox("Select Gemma/Ollama model", OLLAMA_MODELS, index=0)
+st.session_state.selected_model = selected_model
+
+# Page Navigation Router
+if st.session_state.screen != "login":
+    st.sidebar.markdown(f"### {t['nav_heading']}")
+    nav_options = {t['nav_diagnostics']: "Diagnostics", t['nav_chat']: "Chat"}
+    current_index = list(nav_options.values()).index(st.session_state.current_page)
+    selected_nav = st.sidebar.radio("Menu", list(nav_options.keys()), index=current_index, label_visibility="collapsed")
+    st.session_state.current_page = nav_options[selected_nav]
+
+# Render Core CSS Style Elements Layout
+st.markdown("""
+<style>
+.block-container { padding-top: 2rem; padding-bottom: 3rem; }
+.title { font-size:42px; font-weight:900; color:#0f172a; margin-bottom:6px; }
+.subtitle { font-size:18px; color:#475569; margin-bottom:24px; }
+.card { background:white; padding:24px; border-radius:24px; border:1px solid #e2e8f0; box-shadow:0 12px 35px rgba(15,23,42,.08); margin-bottom:18px; }
+.badge { display:inline-block; background:#eef6ff; color:#1d4ed8; padding:8px 14px; border-radius:999px; font-weight:800; margin-bottom:12px; }
+.offline { background:#fef3c7; color:#92400e; }
+.metric { background:white; padding:20px; border-radius:20px; border:1px solid #e2e8f0; box-shadow:0 10px 25px rgba(15,23,42,.06); }
+.metric-label { color:#64748b; font-size:14px; font-weight:700; }
+.metric-value { color:#0f172a; font-size:32px; font-weight:900; }
+.recommendation { background:#f8fafc; border:1px solid #e2e8f0; padding:14px; border-radius:16px; margin-bottom:10px; color:#334155; }
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown(f"<div class='title'>{t['title']}</div>", unsafe_allow_html=True)
+st.markdown(f"<div class='subtitle'>{t['subtitle']}</div>", unsafe_allow_html=True)
+
+# ==========================================
+# Routing Pages Engine Controller Logic
+# ==========================================
 if st.session_state.screen == "login":
     col1, col2 = st.columns([1.2, 0.8])
     with col1:
-        st.markdown("<span class='badge offline'>📴 Local · Low Cost · Offline Ready</span>", unsafe_allow_html=True)
-        st.markdown("## Welcome, teacher")
-        st.write("Analyze student grades, identify learning gaps, and receive practical recommendations to improve classroom performance, even in places with limited internet access.")
-        st.markdown("- 📊 Student performance analysis\n- 🤖 Gemma AI recommendations\n- 🧭 Curriculum alignment\n- 👩‍🏫 Personalized support per student")
+        st.markdown(f"<span class='badge offline'>{t['badge_offline']}</span>", unsafe_allow_html=True)
+        st.markdown(t['welcome_title'])
+        st.write(t['welcome_desc'])
+        st.markdown(t['bullet_points'])
     with col2:
         st.markdown("<div class='card'>", unsafe_allow_html=True)
-        st.markdown("### Teacher Login")
-        username = st.text_input("Username", value=st.session_state.get("username", ""))
-        password = st.text_input("Password", type="password", value=st.session_state.get("password", "admin"))
-        if st.button("Login", use_container_width=True):
+        st.markdown(t['login_card_title'])
+        username = st.text_input(t['lbl_username'], value=st.session_state.get("username", ""))
+        password = st.text_input(t['lbl_password'], type="password", value=st.session_state.get("password", "admin"))
+        if st.button(t['btn_login'], use_container_width=True):
             if username == "admin" and password == "admin":
                 st.session_state.username = username
                 st.session_state.password = password
                 st.session_state.screen = "index"
                 st.session_state.logged_in = True
                 st.rerun()
-            else:
-                st.error("Incorrect username or password. Use admin/admin.")
+            else: st.error(t['err_login'])
         st.markdown("</div>", unsafe_allow_html=True)
 
-elif st.session_state.screen == "index":
-    st.markdown("<span class='badge'>🤖 AI Analysis Setup</span>", unsafe_allow_html=True)
+elif st.session_state.screen == "index" and st.session_state.current_page == "Diagnostics":
+    st.markdown(f"<span class='badge'>{t['setup_badge']}</span>", unsafe_allow_html=True)
     
-    if st.session_state.force_curriculum_view:
-        st.markdown("## Admin Curriculum Configuration")
-        st.write("Upload MEDUCA content, national curriculum, school director guidelines, or the teacher's base lesson plan. This becomes the minimum educational framework Gemma must follow.")
-        curriculum_source = st.selectbox(
-            "Curriculum source",
-            ["MEDUCA", "National Ministry of Education", "School Director Guidelines", "Teacher Base Plan", "Regional Curriculum"],
-            index=["MEDUCA", "National Ministry of Education", "School Director Guidelines", "Teacher Base Plan", "Regional Curriculum"].index(st.session_state.curriculum_source),
-        )
-        grade_level = st.text_input("Grade level", value=st.session_state.curriculum_grade)
-        subject = st.text_input("Subject", value=st.session_state.curriculum_subject)
-        uploaded_curriculum = st.file_uploader("Browse curriculum file", type=["xlsx", "csv", "pdf", "docx"])
-        curriculum_instructions = st.text_area("Curriculum alignment instructions", value=st.session_state.curriculum_instructions)
-
-        if uploaded_curriculum:
-            saved_path = save_uploaded_file(uploaded_curriculum, CURRICULUM_UPLOAD_DIR)
-            st.session_state.curriculum_file_path = str(saved_path)
-            if uploaded_curriculum.name.lower().endswith((".csv", ".xlsx", ".xls")):
-                try:
-                    curriculum_df = load_uploaded_dataframe(uploaded_curriculum)
-                    st.session_state.curriculum_df = curriculum_df
-                    st.success(f"Curriculum saved to: {saved_path}")
-                except Exception as e:
-                    st.session_state.curriculum_df = None
-                    st.error(f"Error reading curriculum file: {e}")
-            else:
-                st.info(f"File saved to: {saved_path}")
-
-        if st.session_state.curriculum_file_path:
-            st.info(f"Loaded curriculum file: {st.session_state.curriculum_file_path}")
-        if st.session_state.curriculum_df is not None:
-            st.markdown("### Curriculum Preview")
-            st.dataframe(st.session_state.curriculum_df.head(10), use_container_width=True)
-            st.markdown("**Curriculum Columns:** " + ", ".join(st.session_state.curriculum_df.columns))
-            st.markdown("### Map Curriculum Columns")
-            curriculum_fields = ["Objectives", "Contents", "Indicators", "Activities"]
-            cols = list(st.session_state.curriculum_df.columns)
-            new_mapping = {}
-            for field in curriculum_fields:
-                selection = st.selectbox(f"Column for '{field}'", ["-- None --"] + cols, index=0, key=f"map_curr_{field}")
-                if selection != "-- None --":
-                    new_mapping[selection] = field
-            if st.button("Apply Curriculum Mapping"):
-                try:
-                    mapped = st.session_state.curriculum_df.rename(columns=new_mapping)
-                    st.session_state.curriculum_df = mapped
-                    st.session_state.curriculum_column_mapping = new_mapping
-                    st.success("Curriculum mapping applied successfully.")
-                    st.dataframe(st.session_state.curriculum_df.head(10), use_container_width=True)
-                except Exception as e:
-                    st.error(f"Error applying mapping: {e}")
-
-        st.success("Curriculum configuration will guide Gemma recommendations.")
-        st.session_state.curriculum_source = curriculum_source
-        st.session_state.curriculum_grade = grade_level
-        st.session_state.curriculum_subject = subject
-        st.session_state.curriculum_instructions = curriculum_instructions
+    if st.session_state.get("force_curriculum_view", False):
+        st.markdown(t['admin_title'])
+        st.write(t['admin_desc'])
+        curriculum_source = st.selectbox(t['lbl_curr_source'], ["MEDUCA", "National Ministry", "Director Guidelines"])
+        uploaded_curriculum = st.file_uploader(t['lbl_browse_curr'], type=["xlsx", "csv"])
         
-        if st.button("✅ Back to Teacher Upload", use_container_width=True, key="back_to_upload"):
+        if uploaded_curriculum:
+            try:
+                st.session_state.curriculum_df = load_uploaded_dataframe(uploaded_curriculum)
+                st.success(t['curr_saved'])
+            except Exception as e: st.error(f"{t['curr_err']} {e}")
+
+        if st.session_state.get("curriculum_df") is not None:
+            st.markdown(t['curr_preview'])
+            st.dataframe(st.session_state.curriculum_df.head(10), use_container_width=True)
+            
+        if st.button(t['btn_back_upload'], use_container_width=True):
             st.session_state.force_curriculum_view = False
             st.rerun()
     else:
-        tab1, tab2 = st.tabs(["Teacher Upload", "Admin Curriculum"])
-
+        tab1, tab2 = st.tabs([t['tab_teacher'], t['tab_admin']])
         with tab2:
-            st.markdown("## Admin Curriculum Configuration")
-            st.write("Upload MEDUCA content, national curriculum, school director guidelines, or the teacher's base lesson plan. This becomes the minimum educational framework Gemma must follow.")
-            curriculum_source = st.selectbox(
-                "Curriculum source",
-                ["MEDUCA", "National Ministry of Education", "School Director Guidelines", "Teacher Base Plan", "Regional Curriculum"],
-                index=["MEDUCA", "National Ministry of Education", "School Director Guidelines", "Teacher Base Plan", "Regional Curriculum"].index(st.session_state.curriculum_source),
-                key="tab2_curriculum_source"
-            )
-            grade_level = st.text_input("Grade level", value=st.session_state.curriculum_grade, key="tab2_grade")
-            subject = st.text_input("Subject", value=st.session_state.curriculum_subject, key="tab2_subject")
-            uploaded_curriculum = st.file_uploader("Browse curriculum file", type=["xlsx", "csv", "pdf", "docx"], key="tab2_uploader")
-            curriculum_instructions = st.text_area("Curriculum alignment instructions", value=st.session_state.curriculum_instructions, key="tab2_instructions")
-
+            st.markdown(t['admin_title'])
+            st.write(t['admin_desc'])
+            uploaded_curriculum = st.file_uploader(t['lbl_browse_curr'], type=["xlsx", "csv"], key="tab2_upload")
             if uploaded_curriculum:
-                saved_path = save_uploaded_file(uploaded_curriculum, CURRICULUM_UPLOAD_DIR)
-                st.session_state.curriculum_file_path = str(saved_path)
-                if uploaded_curriculum.name.lower().endswith((".csv", ".xlsx", ".xls")):
-                    try:
-                        curriculum_df = load_uploaded_dataframe(uploaded_curriculum)
-                        st.session_state.curriculum_df = curriculum_df
-                        st.success(f"Curriculum saved to: {saved_path}")
-                    except Exception as e:
-                        st.session_state.curriculum_df = None
-                        st.error(f"Error reading curriculum file: {e}")
-                else:
-                    st.info(f"File saved to: {saved_path}")
-
-            if st.session_state.curriculum_file_path:
-                st.info(f"Loaded curriculum file: {st.session_state.curriculum_file_path}")
-            if st.session_state.curriculum_df is not None:
-                st.markdown("### Curriculum Preview")
-                st.dataframe(st.session_state.curriculum_df.head(10), use_container_width=True)
-                st.markdown("**Curriculum Columns:** " + ", ".join(st.session_state.curriculum_df.columns))
-                st.markdown("### Map Curriculum Columns")
-                curriculum_fields = ["Objectives", "Contents", "Indicators", "Activities"]
-                cols = list(st.session_state.curriculum_df.columns)
-                new_mapping = {}
-                for field in curriculum_fields:
-                    selection = st.selectbox(f"Column for '{field}'", ["-- None --"] + cols, index=0, key=f"tab2_map_curr_{field}")
-                    if selection != "-- None --":
-                        new_mapping[selection] = field
-                if st.button("Apply Curriculum Mapping", key="tab2_apply_map"):
-                    try:
-                        mapped = st.session_state.curriculum_df.rename(columns=new_mapping)
-                        st.session_state.curriculum_df = mapped
-                        st.session_state.curriculum_column_mapping = new_mapping
-                        st.success("Curriculum mapping applied successfully.")
-                        st.dataframe(st.session_state.curriculum_df.head(10), use_container_width=True)
-                    except Exception as e:
-                        st.error(f"Error applying mapping: {e}")
-
-            st.success("Curriculum configuration will guide Gemma recommendations.")
-            st.session_state.curriculum_source = curriculum_source
-            st.session_state.curriculum_grade = grade_level
-            st.session_state.curriculum_subject = subject
-            st.session_state.curriculum_instructions = curriculum_instructions
-
-        if st.button("Logout", key="logout_index", help="Return to login"): 
-            st.session_state.screen = "login"
-            st.session_state.logged_in = False
-            st.session_state.username = ""
-            st.session_state.password = ""
-            st.rerun()
+                try:
+                    st.session_state.curriculum_df = load_uploaded_dataframe(uploaded_curriculum)
+                    st.success(t['lbl_applied'])
+                except Exception as e: st.error(str(e))
 
         with tab1:
-            st.markdown("## Upload Student Performance Data")
-            st.write("Upload an Excel or CSV file with student grades, attendance, subjects, topics, and competencies.")
-            st.download_button("Download Excel Template", data=create_template(), file_name="teacher_coach_ai_template.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-            uploaded_file = st.file_uploader("Browse student Excel or CSV file", type=["xlsx", "csv"])
-            st.text_area("Additional teacher instructions for Gemma", value="Focus on students with low attendance and low scores. Recommend simple activities that do not require internet or expensive materials.")
+            st.markdown(t['upload_title'])
+            st.write(t['upload_desc'])
+            st.download_button(t['btn_download_template'], data=create_template(), file_name="template.xlsx")
+            uploaded_file = st.file_uploader(t['lbl_browse_student'], type=["xlsx", "csv"])
+            st.text_area(t['lbl_teacher_inst'], value=t['val_teacher_inst'])
 
             if uploaded_file:
                 try:
-                    saved_path = save_uploaded_file(uploaded_file, UPLOAD_DIR)
-                    df = load_uploaded_dataframe(uploaded_file)
-                    st.session_state.df = df
-                    st.success(f"File uploaded and saved to: {saved_path}")
-                    st.dataframe(df.head(10), use_container_width=True)
+                    st.session_state.df = load_uploaded_dataframe(uploaded_file)
+                    st.success(t['student_uploaded_success'])
+                    st.dataframe(st.session_state.df.head(5), use_container_width=True)
+                except Exception as e: st.error(str(e))
+            else: st.info(t['no_file_info'])
 
-                    st.markdown("### Map Student File Columns")
-                    cols = list(df.columns)
-                    mapping = {}
-                    for req in required_columns:
-                        sel = st.selectbox(f"Column for '{req}'", ["-- None --"] + cols, index=0, key=f"map_student_{req}")
-                        if sel != "-- None --":
-                            mapping[sel] = req
-
-                    if st.button("Apply Student Mapping"):
-                        try:
-                            mapped_df = df.rename(columns=mapping)
-                            missing = validate_file(mapped_df)
-                            if missing:
-                                st.error("Missing required columns after mapping: " + ", ".join(missing))
-                            else:
-                                st.session_state.df = mapped_df
-                                st.session_state.student_column_mapping = mapping
-                                st.success("Mapping applied and data loaded successfully.")
-                                st.dataframe(mapped_df.head(10), use_container_width=True)
-                        except Exception as e:
-                            st.error(f"Error applying student mapping: {e}")
-                except Exception as e:
-                    st.error(f"Error reading file: {e}")
-            else:
-                st.info("No file uploaded yet. The app will use sample student data for the demo.")
-
-            st.info(f"Recommendation generation with the selected model ({st.session_state.get('selected_model')}) may take several seconds per student.")
+            st.info(t['model_time_info'])
             
-            curriculum_exists = Path("data/admin_curriculum_example.csv").exists() or st.session_state.curriculum_df is not None
+            curriculum_exists = st.session_state.get("curriculum_df") is not None
             can_proceed = True
 
             if not curriculum_exists:
-                st.warning("⚠️ No attached curriculum found (admin_curriculum_example.csv).")
-                st.info("An evaluation without a curriculum will be performed, limiting recommendations to general best practices.")
-                can_proceed = st.checkbox("I understand, continue without a personalized curriculum", key="confirm_skip_curr")
-                
-                if not can_proceed:
-                     if st.button("❌ Go to configure curriculum", use_container_width=True):
-                         st.session_state.force_curriculum_view = True
-                         st.rerun()
+                st.warning(t['no_curr_warn'])
+                st.info(t['no_curr_info'])
+                can_proceed = st.checkbox(t['chk_understand'], key="confirm_skip_curr")
+                if not can_proceed and st.button(t['btn_go_curr'], use_container_width=True):
+                     st.session_state.force_curriculum_view = True
+                     st.rerun()
 
             if can_proceed:
-                if st.button("Analyze gaps with AI", use_container_width=True):
+                if st.button(t['btn_analyze_gaps'], use_container_width=True):
                     missing = validate_file(st.session_state.df)
-                    if missing:
-                        st.error("Missing required columns before analysis: " + ", ".join(missing))
+                    if missing: st.error(t['err_missing_pre_analysis'] + ", ".join(missing))
                     else:
                         try:
-                            # CRITICAL ARCHITECTURAL FIX: 
-                            # We build the RAG text and fetch model name on the MAIN THREAD before spawning workers
                             curr_desc = build_curriculum_description()
-                            model_name = st.session_state.get("selected_model", "gemma4:e2b")
-                            
-                            final_df, summary = analyze_students(st.session_state.df, model_name, curr_desc)
-                            
-                            # Clean error tracking mapped to the correct dynamic variable
-                            errors = [r for r in final_df["Gemma_4_Recommendation"] if isinstance(r, str) and r.startswith("Error generating recommendation:")]
-                            if errors:
-                                st.error("An error occurred during Ollama recommendation generation. Please check model availability.")
-                                for err in errors[:3]:
-                                    st.warning(err)
+                            final_df, summary = analyze_students(st.session_state.df, st.session_state.selected_model, curr_desc, t['prompt_lang'])
                             st.session_state.analysis = {"df": final_df, "summary": summary}
                             st.session_state.screen = "dashboard"
                             st.rerun()
-                        except Exception as e:
-                            st.error("Error generating recommendations: " + str(e))
+                        except Exception as e: st.error(t['err_gen_rec_outer'] + str(e))
 
-elif st.session_state.screen == "dashboard":
+        if st.button(t['btn_logout'], key="logout_index"):
+            st.session_state.screen = "login"
+            st.rerun()
+
+elif st.session_state.screen == "dashboard" and st.session_state.current_page == "Diagnostics":
     df = st.session_state.analysis["df"]
     summary = st.session_state.analysis["summary"]
-
-    st.markdown("<span class='badge'>✨ AI Insights</span>", unsafe_allow_html=True)
-    st.markdown("## Teacher Analytics Dashboard")
-    if st.button("Logout", key="logout_dashboard", help="Return to login from dashboard"):
-        st.session_state.screen = "login"
-        st.session_state.logged_in = False
-        st.session_state.username = ""
-        st.session_state.password = ""
-        st.rerun()
-
+    st.markdown(f"<span class='badge'>{t['insights_badge']}</span>", unsafe_allow_html=True)
+    
     c1, c2, c3, c4 = st.columns(4)
-    with c1:
-        st.markdown(f"<div class='metric'><div class='metric-label'>Students analyzed</div><div class='metric-value'>{summary['students']}</div></div>", unsafe_allow_html=True)
-    with c2:
-        st.markdown(f"<div class='metric'><div class='metric-label'>Class average</div><div class='metric-value'>{summary['average']}%</div></div>", unsafe_allow_html=True)
-    with c3:
-        st.markdown(f"<div class='metric'><div class='metric-label'>Students needing support</div><div class='metric-value'>{summary['at_risk']}</div></div>", unsafe_allow_html=True)
-    with c4:
-        st.markdown(f"<div class='metric'><div class='metric-label'>Weakest subject</div><div class='metric-value' style='font-size:24px'>{summary['weakest_subject']}</div></div>", unsafe_allow_html=True)
+    c1.markdown(f"<div class='metric'><div class='metric-label'>{t['metric_students']}</div><div class='metric-value'>{summary['students']}</div></div>", unsafe_allow_html=True)
+    c2.markdown(f"<div class='metric'><div class='metric-label'>{t['metric_avg']}</div><div class='metric-value'>{summary['average']}%</div></div>", unsafe_allow_html=True)
+    c3.markdown(f"<div class='metric'><div class='metric-label'>{t['metric_at_risk']}</div><div class='metric-value'>{summary['at_risk']}</div></div>", unsafe_allow_html=True)
+    c4.markdown(f"<div class='metric'><div class='metric-label'>{t['metric_weakest']}</div><div class='metric-value' style='font-size:22px'>{summary['weakest_subject']}</div></div>", unsafe_allow_html=True)
 
-    st.markdown("## Weak Learning Areas")
-    st.bar_chart(df.groupby("Subject")["Score"].mean().sort_values())
+    st.markdown(t['chart_title'])
+    st.bar_chart(df.groupby("Subject")["Score"].mean())
 
-    st.markdown("## Recommendations per Student")
-    st.dataframe(df[["Student", "Grade", "Subject", "Topic", "Competency", "Score", "Attendance", "Risk_Level", "Gemma_4_Recommendation"]], use_container_width=True)
+    st.markdown(t['rec_per_student_title'])
+    st.dataframe(df[["Student", "Grade", "Subject", "Topic", "Score", "Attendance", "Risk_Level", "Gemma_4_Recommendation"]], use_container_width=True)
 
     col1, col2, col3 = st.columns(3)
-    with col1:
-        st.markdown("<div class='card'><h3>🤖 AI Recommendations</h3><div class='recommendation'>Use visual examples and classroom objects for weak topics.</div><div class='recommendation'>Create small support groups for students with similar learning gaps.</div><div class='recommendation'>Apply short weekly assessments to measure progress.</div></div>", unsafe_allow_html=True)
-    with col2:
-        st.markdown("<div class='card'><h3>📅 Weekly Plan</h3><div class='recommendation'><b>Monday:</b> Guided review of weak topics.</div><div class='recommendation'><b>Wednesday:</b> Practice in small groups.</div><div class='recommendation'><b>Friday:</b> Mini assessment and feedback.</div></div>", unsafe_allow_html=True)
-    with col3:
-        st.markdown("<div class='card'><h3>🧭 Responsible AI</h3><div class='recommendation'>Recommendations are aligned with curriculum guidance.</div><div class='recommendation'>The system avoids labeling students negatively.</div><div class='recommendation'>The teacher remains in control of decisions.</div></div>", unsafe_allow_html=True)
+    col1.markdown(f"<div class='card'>{t['card_ai_rec']}</div>", unsafe_allow_html=True)
+    col2.markdown(f"<div class='card'>{t['card_weekly']}</div>", unsafe_allow_html=True)
+    col3.markdown(f"<div class='card'>{t['card_responsible']}</div>", unsafe_allow_html=True)
 
-    if st.button("Back to Index"):
+    if st.button(t['btn_back_index']):
         st.session_state.screen = "index"
+        st.rerun()
+
+elif st.session_state.current_page == "Chat":
+    st.markdown(f"<span class='badge'>{t['chat_badge']}</span>", unsafe_allow_html=True)
+    st.markdown(f"## {t['nav_chat']}")
+    st.info(f"⚡ Connected to local model: **{st.session_state.selected_model}** (100% Offline Mode)")
+
+    for msg in st.session_state.chat_history:
+        with st.chat_message(msg["role"]): st.markdown(msg["content"])
+
+    if not st.session_state.chat_history:
+        with st.chat_message("assistant"): st.markdown(t['chat_welcome'])
+
+    if user_query := st.chat_input(t['chat_placeholder']):
+        with st.chat_message("user"): st.markdown(user_query)
+        st.session_state.chat_history.append({"role": "user", "content": user_query})
+
+        with st.chat_message("assistant"):
+            response_placeholder = st.empty()
+            try:
+                system_prompt = f"You are a professional educational consultant mentor. Help the teacher design local strategies. Respond strictly and only in {t['prompt_lang']}."
+                response = ollama.chat(
+                    model=st.session_state.selected_model,
+                    messages=[{"role": "system", "content": system_prompt}, *st.session_state.chat_history]
+                )
+                assistant_response = response.get("message", {}).get("content", "").strip()
+                response_placeholder.markdown(assistant_response)
+                st.session_state.chat_history.append({"role": "assistant", "content": assistant_response})
+            except Exception as e: response_placeholder.error(f"Error calling local model: {e}")
         st.rerun()
